@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:http/io_client.dart';
 import 'package:http/http.dart' as http;
+import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/dialogs.dart';
 import 'package:staff_pos_app/src/common/global_service.dart';
 import 'package:staff_pos_app/src/common/messages.dart';
@@ -16,6 +17,9 @@ class Webservice {
           ((X509Certificate cert, String host, int port) => true);
     IOClient ioClient = IOClient(httpClient);
     bool conf = false;
+    if (constIsTestApi == 1) {
+      print('Request Url: $url \n \t\tReq: $param');
+    }
     do {
       try {
         final response = await ioClient.post(Uri.parse(url),
@@ -25,7 +29,7 @@ class Webservice {
             },
             body: param);
         if (response.statusCode == 200) {
-          //log(response.body);
+          print('\t\tRes: ${response.body}');
           return jsonDecode(response.body);
         } else {
           conf = await Dialogs().retryOrExit(context, errServerString);

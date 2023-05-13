@@ -222,6 +222,7 @@ class _Login extends State<Login> {
     }
 
     Dialogs().loaderDialogNormal(context);
+
     StaffModel? staff = await ClStaff().login(context, email, password);
 
     if (staff == null) {

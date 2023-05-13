@@ -30,5 +30,9 @@ List<dynamic> saveControlShifts = [];
 int progressPercent = 0;
 bool isUpload = false;
 
-String? staffApplyTime = '';
-String? staffApplicationTime = '';
+// String? staffApplyTime = '';
+// String? staffApplicationTime = '';
+
+// Shift Engine
+int shiftWeekPlanMinute = 0;
+int shiftWeekStaffMinute = 0;

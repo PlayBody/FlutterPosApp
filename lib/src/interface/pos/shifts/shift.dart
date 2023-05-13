@@ -199,9 +199,9 @@ class _Shift extends State<Shift> {
 
   Future<void> viewShift(String selDate, params) async {
     String txtStatus = '';
-    if (params['status'] == '1') txtStatus = '申請中';
-    if (params['status'] == '2') txtStatus = '承認';
-    if (params['status'] == '3') txtStatus = '保留';
+    if (params['status'] == '1') txtStatus = '申請中'; // Requesting
+    if (params['status'] == '2') txtStatus = '承認'; // Accepted
+    if (params['status'] == '3') txtStatus = '保留'; // Rejected
 
     showDialog(
         context: context,
@@ -328,7 +328,7 @@ class _Shift extends State<Shift> {
 
   @override
   Widget build(BuildContext context) {
-    globals.appTitle = 'シフト';
+    globals.appTitle = 'シフト'; // Shift
     return MainBodyWdiget(
         fullScreenButton: _fullScreenContainer(),
         isFullScreen: isHideBannerBar,
@@ -377,7 +377,7 @@ class _Shift extends State<Shift> {
     return Row(
       children: [
         SizedBox(width: 16),
-        InputLeftText(label: '店名', rPadding: 8, width: 60),
+        InputLeftText(label: '店名', rPadding: 8, width: 60), //Store name
         Expanded(
             child: DropDownModelSelect(
           contentPadding: EdgeInsets.symmetric(vertical: 7),
@@ -398,7 +398,9 @@ class _Shift extends State<Shift> {
         )),
         SizedBox(width: 8),
         if (globals.auth > constAuthStaff)
-          WhiteButton(label: 'シフト管理', tapFunc: () => pushShiftManage()),
+          WhiteButton(
+              label: 'シフト管理',
+              tapFunc: () => pushShiftManage()), // Shift Management
         SizedBox(width: 30)
       ],
     );
@@ -415,7 +417,7 @@ class _Shift extends State<Shift> {
         ),
         Container(
           child: WhiteButton(
-            label: '標準設定適用',
+            label: '標準設定適用', // Apply Standard Settings
             tapFunc: DateTime.parse(showToDate + ' 23:59:59')
                     .isBefore(DateTime.now())
                 ? null
@@ -424,7 +426,9 @@ class _Shift extends State<Shift> {
         ),
         SizedBox(width: 8),
         Container(
-          child: WhiteButton(label: '設定画面へ', tapFunc: () => pushInitSetting()),
+          child: WhiteButton(
+              label: '設定画面へ',
+              tapFunc: () => pushInitSetting()), // Push To Settings
         )
       ]),
     );

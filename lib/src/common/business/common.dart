@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:package_info/package_info.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/http/webservice.dart';
 
 import '../apiendpoint.dart';
@@ -17,6 +18,10 @@ class ClCommon {
       'app_id': packageInfo.packageName,
       'os_type': Platform.operatingSystem
     }).then((v) => {results = v});
+
+    if (constIsTestApi == 1) {
+      return true;
+    }
 
     String testFlag = results['test_flag'] ?? '0';
     if (testFlag == '1' ||

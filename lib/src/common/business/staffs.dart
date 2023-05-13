@@ -13,12 +13,20 @@ import '../../common/globals.dart' as globals;
 class ClStaff {
   Future<StaffModel?> login(context, staffMail, password) async {
     Map<dynamic, dynamic> results = {};
-    String apiUrl = '$apiBase/apistaffs/login';
-    await Webservice().loadHttp(context, apiUrl,
+    // String apiUrl = '$apiBase/apistaffs/login';
+
+    await Webservice().loadHttp(context, apiStaffLogin,
         {'email': staffMail, 'password': password!}).then((v) => results = v);
 
-    if (results['isLogin']) {
-      return StaffModel.fromJson(results['staff']);
+//  Check Login Result
+    print(results);
+
+    try {
+      if (results['isLogin'] != null) {
+        return StaffModel.fromJson(results['staff']);
+      }
+    } catch (e) {
+      return null;
     }
     return null;
   }

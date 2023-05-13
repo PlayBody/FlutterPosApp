@@ -53,8 +53,7 @@ class _ShiftMake extends State<ShiftMake> {
   DateTime? reserveTo;
   String? reserveId;
 
-  String? applyShiftTime = '';
-  String? applicationShiftTime = '';
+//  String? applicationShiftTime = '';
 
   @override
   void initState() {
@@ -73,10 +72,6 @@ class _ShiftMake extends State<ShiftMake> {
     bool isLoad = await ClShift()
         .loadStaffShiftTime(context, globals.staffId, selOrganId!);
 
-    if (isLoad) {
-      applyShiftTime = globals.staffApplyTime;
-      applicationShiftTime = globals.staffApplicationTime;
-    }
     regions = await ClShift()
         .loadActiveShiftRegions(context, selOrganId!, showFromDate);
     regions.addAll(await ClShift()
@@ -274,15 +269,22 @@ class _ShiftMake extends State<ShiftMake> {
   }
 
   Widget _getTopButtons() {
+    int restPlanMinutes =
+        globals.shiftWeekPlanMinute - globals.shiftWeekStaffMinute;
+    restPlanMinutes = restPlanMinutes > 0 ? restPlanMinutes : 0;
     return Container(
       padding: EdgeInsets.only(top: 10, bottom: 5, left: 8),
       child: Row(children: [
         Expanded(
-          // child: SubHeaderText(
-          //     label: DateTimes().convertJPYMFromString(showFromDate)),
-          child: Text(
-              '承認時間 ${applyShiftTime} 分\n勤務申請時間 ${applicationShiftTime} 分'),
-        ),
+            // child: SubHeaderText(
+            //     label: DateTimes().convertJPYMFromString(showFromDate)),
+            // Approval Time , Job Application Time
+
+            // child: Text(
+            //     '承認時間 ${globals.shiftWeekPlanMinute} 分\n勤務申請時間 ${globals.shiftWeekStaffMinute} 分'),
+            child: Text('週間出勤希望時間-(申請中+承認): $restPlanMinutes分')),
+        // child: Text(
+        //     'A: ${globals.shiftWeekPlanMinute} \nB: ${globals.shiftWeekStaffMinute}')),
         Container(
           child: WhiteButton(label: '標準設定適用', tapFunc: () => onTapInitButton()),
         ),

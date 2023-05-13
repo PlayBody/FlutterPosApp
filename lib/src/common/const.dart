@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 const String consAndroidStore =
     'https://play.google.com/apps/internaltest/4701332527315630553';
 
+const int constIsTestApi = 1;
+
 // ---------------- Permission Manager -----------------------
 const int constAuthGuest = 0;
 const int constAuthStaff = 1;

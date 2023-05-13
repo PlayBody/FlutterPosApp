@@ -6,6 +6,7 @@ import 'package:staff_pos_app/src/common/business/organ.dart';
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/dialogs.dart';
 import 'package:staff_pos_app/src/common/functions/shifts.dart';
+import 'package:staff_pos_app/src/common/functions/utils.dart';
 import 'package:staff_pos_app/src/common/messages.dart';
 import 'package:staff_pos_app/src/http/webservice.dart';
 import 'package:staff_pos_app/src/model/organmodel.dart';
@@ -195,9 +196,7 @@ class ClShift {
     }).then((value) => results = value);
 
     if (results['isLoad']) {
-      globals.staffApplyTime = results['shift_apply_time'].toString();
-      globals.staffApplicationTime =
-          results['shift_application_time'].toString();
+      globals.shiftWeekPlanMinute = int.parse(results['staff_times']);
       return true;
     }
 
@@ -214,11 +213,16 @@ class ClShift {
     await Webservice().loadHttp(context, apiUrl, {'organ_id': organId}).then(
         (value) => results = value);
 
+    List<DateInterval> ditv = List.empty(growable: true);
+
     for (var item in results['shift_times']) {
       var startDate = DateTime.parse('$firstDate ${item['from_time']}')
           .add(Duration(days: int.parse(item['weekday']) - 1));
       var endDate = DateTime.parse('$firstDate ${item['to_time']}')
           .add(Duration(days: int.parse(item['weekday']) - 1));
+
+      ditv.add(DateInterval(from: startDate, to: endDate));
+
       regions.add(TimeRegion(
           startTime: startDate,
           endTime: endDate,
@@ -240,14 +244,21 @@ class ClShift {
       'to_time': toDateTime,
     }).then((value) => results = value);
     for (var item in results['times']) {
+      var from = DateTime.parse(item['from_time']);
+      var to = DateTime.parse(item['to_time']);
+
+      ditv.add(DateInterval(from: from, to: to));
+
       regions.add(TimeRegion(
-          startTime: DateTime.parse(item['from_time']),
-          endTime: DateTime.parse(item['to_time']),
+          startTime: from,
+          endTime: to,
           enablePointerInteraction: true,
           // recurrenceRule: 'FREQ=DAILY;INTERVAL=1',
           color: const Color(0xffffc3bf), //shiftOrganDisableColor,
           text: ''));
     }
+
+    globals.shiftWeekStaffMinute = DateIntervalUtil.getTotalMinutes(ditv);
 
     return regions;
   }
