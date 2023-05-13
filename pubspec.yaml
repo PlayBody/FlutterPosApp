@@ -1,0 +1,157 @@
+name: staff_pos_app
+description: A new Flutter project.
+
+# The following line prevents the package from being accidentally published to
+# pub.dev using `pub publish`. This is preferred for private packages.
+publish_to: 'dart pub upgrade --null-safety' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+version: 1.0.2+1
+
+environment:
+  sdk: ">=2.18.0 <3.0.0"
+
+dependencies:
+  flutter_localizations:
+    sdk: flutter
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.3
+  intl: ^0.17.0
+  
+  http: ^0.13.3
+  mockito: ^5.0.14
+  json_annotation: ^4.0.1
+  english_words: ^4.0.0
+  dio: ^4.0.0
+  table_calendar: ^3.0.2
+  flutter_calendar_carousel: ^2.0.3
+  charts_flutter: ^0.12.0
+  syncfusion_flutter_datepicker: ^20.2.44
+  syncfusion_flutter_calendar: ^20.2.44
+  syncfusion_flutter_charts: ^20.2.44
+  path_provider: ^2.0.2
+  time_range: ^1.0.0
+  image_picker: ^0.8.3+2
+  date_time_picker: ^2.1.0
+  flutter_datetime_picker: ^1.5.1
+  package_info: ^2.0.2
+  shared_preferences: ^2.0.6
+  flutter_html: ^2.1.1
+  url_launcher: ^6.0.9
+  qr_code_scanner: ^1.0.1
+  flutter_screenutil: ^5.0.0+2
+  firebase_core: ^1.6.0
+  firebase_database: ^9.1.2
+  firebase_messaging: ^12.0.3
+  number_inc_dec: ^0.8.0
+  google_maps_flutter: ^2.0.09
+  geolocator: ^9.0.1
+  location: ^4.3.0
+  flutter_multiselect: ^1.0.0
+  chewie: ^1.2.2
+  esc_pos_printer: ^4.1.0
+  esc_pos_utils: ^1.1.0
+  fluttertoast: ^8.0.8
+  external_path: ^1.0.1
+  flutter_dialogs: ^3.0.0
+  euc: ^1.0.6+8
+  flutter_beep: ^1.0.0
+  open_file: ^3.2.1
+  syncfusion_flutter_pdf: ^20.2.44
+  file_picker: ^4.2.7
+  excel: ^2.0.0-null-safety-3
+  flutter_local_notifications: ^9.1.4
+  flutter_downloader: ^1.7.1
+  # only IOS gallery_saver: ^2.3.2
+  flutter_app_badger: ^1.3.0
+  flutter_linkify: ^5.0.1  
+  video_thumbnail: ^0.5.2
+    # git: https://github.com/ajbcoder/video_thumbnail
+
+  stream_transform: ^2.0.0
+  modal_bottom_sheet: ^2.1.2
+  local_auth: ^2.1.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  json_serializable: ^6.3.1
+  build_runner: ^2.1.1
+  flutter_lints: ^2.0.1
+dependency_overrides:
+  modal_bottom_sheet:
+    git:
+      url: https://github.com/danReynolds/modal_bottom_sheet.git
+      path: modal_bottom_sheet
+
+flutter:
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # To add assets to your application, add an assets section, like this:
+  assets:
+    - images/background.jpg
+    - images/icon_header_point.png
+    - images/icon_menu_attendance.png
+    - images/icon_menu_accounting.png
+    - images/icon_menu_payslip.png
+    - images/icon_menu_shift.png
+    - images/icon_menu_stock.png
+    - images/icon_menu_sale.png
+    - images/icon_menu_customer.png
+    - images/icon_menu_staff.png
+    - images/account.png
+    - images/scan_face.png
+    - images/no_image.jpg
+    - images/icon_order_calculator.png
+
+    - images/icon/icon_home.png
+    - images/icon/icon_back.png
+    - images/icon/icon_forward.png
+    - images/icon/icon_setting.png
+    - images/icon/icon_logout.png
+    - images/icon/icon_shift.png
+    - images/icon/icon_point.png
+
+    - images/receipt_img1.png
+    - images/icon/right_sharp.png
+    
+  # An image asset can refer to one or more resolution-specific "variants", see
+  # https://flutter.dev/assets-and-images/#resolution-aware.
+
+  # For details regarding adding assets from package dependencies, see
+  # https://flutter.dev/assets-and-images/#from-packages
+
+  # To add custom fonts to your application, add a fonts section here,
+  # in this "flutter" section. Each entry in this list should have a
+  # "family" key with the font family name, and a "fonts" key with a
+  # list giving the asset and other descriptors for the font. For
+  # example:
+  # fonts:
+  #   - family: Schyler
+  #     fonts:
+  #       - asset: fonts/Schyler-Regular.ttf
+  #       - asset: fonts/Schyler-Italic.ttf
+  #         style: italic
+  #   - family: Trajan Pro
+  #     fonts:
+  #       - asset: fonts/TrajanPro.ttf
+  #       - asset: fonts/TrajanPro_Bold.ttf
+  #         weight: 700
+  #
+  # For details regarding fonts from package dependencies,
+  # see https://flutter.dev/custom-fonts/#from-packages
