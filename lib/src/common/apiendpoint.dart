@@ -226,6 +226,7 @@ String apiLoadSlipsUrl = '$apiBase/apis/slip/loadPaySlipMonth';
 
 String apiShiftSaveStaffInput = '$apiBase/apis/shift/shifts/saveStaffInput';
 String apiShiftLoadManage = '$apiBase/apis/shift/managements/loadInit';
+String apiShiftLoadManagePsg = '$apiBase/apis/shift/managements/loadInitPsg';
 String apiShiftSaveShiftManage =
     '$apiBase/apis/shift/managements/saveShiftManage';
 

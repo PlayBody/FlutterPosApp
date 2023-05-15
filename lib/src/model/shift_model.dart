@@ -1,10 +1,16 @@
+import 'package:staff_pos_app/src/common/functions/utils.dart';
+
 class ShiftModel {
   final String shiftId;
   final String organId;
   final String staffId;
   final DateTime fromTime;
-  final DateTime toTime;
-  final String shiftType;
+  DateTime toTime;
+  String shiftType;
+
+  int getDurationByMinute() {
+    return toTime.difference(fromTime).inMinutes;
+  }
 
   ShiftModel({
     required this.shiftId,
@@ -14,6 +20,16 @@ class ShiftModel {
     required this.toTime,
     required this.shiftType,
   });
+
+  factory ShiftModel.fromWorkTime(WorkTime work) {
+    return ShiftModel(
+        shiftId: work.meta.shiftId,
+        organId: work.meta.organId,
+        staffId: work.meta.staffId,
+        fromTime: work.start,
+        toTime: work.end,
+        shiftType: work.meta.shiftType);
+  }
 
   factory ShiftModel.fromJson(Map<String, dynamic> json) {
     return ShiftModel(

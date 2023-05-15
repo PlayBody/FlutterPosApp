@@ -213,7 +213,7 @@ class ClShift {
     await Webservice().loadHttp(context, apiUrl, {'organ_id': organId}).then(
         (value) => results = value);
 
-    List<DateInterval> ditv = List.empty(growable: true);
+    List<WorkTime> ditv = List.empty(growable: true);
 
     for (var item in results['shift_times']) {
       var startDate = DateTime.parse('$firstDate ${item['from_time']}')
@@ -221,7 +221,7 @@ class ClShift {
       var endDate = DateTime.parse('$firstDate ${item['to_time']}')
           .add(Duration(days: int.parse(item['weekday']) - 1));
 
-      ditv.add(DateInterval(from: startDate, to: endDate));
+      ditv.add(WorkTime(startDate, endDate));
 
       regions.add(TimeRegion(
           startTime: startDate,
@@ -247,7 +247,7 @@ class ClShift {
       var from = DateTime.parse(item['from_time']);
       var to = DateTime.parse(item['to_time']);
 
-      ditv.add(DateInterval(from: from, to: to));
+      ditv.add(WorkTime(from, to));
 
       regions.add(TimeRegion(
           startTime: from,
@@ -258,7 +258,7 @@ class ClShift {
           text: ''));
     }
 
-    globals.shiftWeekStaffMinute = DateIntervalUtil.getTotalMinutes(ditv);
+    globals.shiftWeekStaffMinute = WorkTimeUtil.getTotalMinutes(ditv);
 
     return regions;
   }
@@ -430,7 +430,7 @@ class ClShift {
     return shifts;
   }
 
-  Future<List<ShiftModel>> loadShifts(context, param) async {
+  Future<List<ShiftModel>> loadShifts(BuildContext context, param) async {
     Map<dynamic, dynamic> results = {};
     await Webservice().loadHttp(context, apiLoadShiftsUrl,
         {'condition': jsonEncode(param)}).then((value) => results = value);
@@ -595,6 +595,22 @@ class ClShift {
       context, organId, fromTime, toTime) async {
     Map<dynamic, dynamic> results = {};
     await Webservice().loadHttp(context, apiShiftLoadManage, {
+      'organ_id': organId,
+      'from_time': fromTime,
+      'to_time': toTime,
+    }).then((value) => results = value);
+    List<ShiftManageModel> manages = [];
+    for (var item in results['data']) {
+      manages.add(ShiftManageModel.fromJson(item));
+    }
+
+    return manages;
+  }
+
+  Future<List<ShiftManageModel>> loadShiftManagePsg(
+      context, organId, fromTime, toTime) async {
+    Map<dynamic, dynamic> results = {};
+    await Webservice().loadHttp(context, apiShiftLoadManagePsg, {
       'organ_id': organId,
       'from_time': fromTime,
       'to_time': toTime,

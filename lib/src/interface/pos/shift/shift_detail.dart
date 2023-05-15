@@ -14,6 +14,7 @@ import 'package:staff_pos_app/src/common/globals.dart' as globals;
 import 'package:staff_pos_app/src/model/order_model.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
 import 'package:staff_pos_app/src/model/stafflistmodel.dart';
+import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'dlg_shift_time_edit.dart';
 
 class ShiftDetail extends StatefulWidget {
@@ -40,7 +41,7 @@ class _ShiftDetail extends State<ShiftDetail> {
   List<StaffListModel> staffs = [];
   List<OrderModel> orders = [];
 
-  List<dynamic> detailData = [];
+  List<Map<String, dynamic>> detailData = [];
   String fromDate = '';
   String toDate = '';
 
@@ -68,38 +69,77 @@ class _ShiftDetail extends State<ShiftDetail> {
     });
 
     detailData = [];
-    staffs.forEach((_staff) {
-      var _data = {};
-      _data['staff_name'] = _staff.staffNick != ''
-          ? _staff.staffNick
-          : (_staff.staffFirstName! + ' ' + _staff.staffLastName!);
-      _data['staff_id'] = _staff.staffId;
-      ShiftModel? _shift = shifts
-                  .where((element) => element.staffId == _staff.staffId)
-                  .length >
-              0
-          ? shifts.where((element) => element.staffId == _staff.staffId).first
-          : null;
-      if (_shift != null) {
-        _data['shift_id'] = _shift.shiftId;
-        _data['date'] = DateFormat('yyyy-MM-dd').format(_shift.fromTime);
-        _data['from_time'] =
-            DateFormat('HH:mm').format(_shift.fromTime);
-        _data['to_time'] =
-            DateFormat('HH:mm').format(_shift.toTime);
-        _data['shift_type'] = _shift.shiftType;
-        _data['limit_from_time'] = DateFormat('HH:mm').format(widget.from);
-        _data['limit_to_time'] = DateFormat('HH:mm').format(widget.to);
+    for (var sta in staffs) {
+      Map<String, dynamic> data = {};
+      data['staff_name'] = sta.staffNick != ''
+          ? sta.staffNick
+          : ('${sta.staffFirstName} ${sta.staffLastName}');
+      data['staff_id'] = sta.staffId;
+      data['auth'] = sta.auth;
+      ShiftModel? tempShift =
+          shifts.where((element) => element.staffId == sta.staffId).isNotEmpty
+              ? shifts.where((element) => element.staffId == sta.staffId).first
+              : null;
+      if (tempShift != null) {
+        data['shift_id'] = tempShift.shiftId;
+        data['date'] = DateFormat('yyyy-MM-dd').format(tempShift.fromTime);
+        data['from_time'] = DateFormat('HH:mm').format(tempShift.fromTime);
+        data['to_time'] = DateFormat('HH:mm').format(tempShift.toTime);
+        data['shift_type'] = tempShift.shiftType;
+        data['limit_from_time'] = DateFormat('HH:mm').format(widget.from);
+        data['limit_to_time'] = DateFormat('HH:mm').format(widget.to);
       }
-
-      var _searchReserves =
-          orders.where((element) => element.staffId == _staff.staffId);
-      if (_searchReserves.length > 0) {
-        _data['reserve_type'] = _searchReserves.first.status;
+      var searchReserves =
+          orders.where((element) => element.staffId == sta.staffId);
+      if (searchReserves.isNotEmpty) {
+        data['reserve_type'] = searchReserves.first.status;
       }
-
-      detailData.add(_data);
+      detailData.add(data);
+    }
+    // 정렬기준: 신청, 재요청, 강제요청, 자체승인은 우선.
+    // 우선시 시작시간순으로 정렬해서 보여준다.
+    // 빈 사람들은 그다음.
+    // 다음 나머지.
+    detailData.sort((m1, m2) {
+      List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
+      var st1 = m1['shift_type'];
+      var st2 = m2['shift_type'];
+      if (st1 == null) {
+        if (st2 == null) {
+          return m1['staff_id'].compareTo(m2['staff_id']);
+        } else {
+          if (reqs.contains(st2)) {
+            return 1;
+          } else {
+            return -1;
+          }
+        }
+      } else {
+        if (st2 == null) {
+          if (reqs.contains(st1)) {
+            return -1;
+          } else {
+            return 1;
+          }
+        } else {
+          if (st1.compareTo(st2) != 0) {
+            int aa, bb;
+            aa = reqs.indexOf(st1);
+            bb = reqs.indexOf(st2);
+            return aa == bb
+                ? 0
+                : aa < bb
+                    ? -1
+                    : 1;
+          }
+          if (m1['from_time'] != null && m2['from_time'] != null) {
+            return m1['from_time'].compareTo(m2['from_time']);
+          }
+          return m1['staff_id'].compareTo(m2['staff_id']);
+        }
+      }
     });
+
     setState(() {});
     return [];
   }
@@ -237,14 +277,14 @@ class _ShiftDetail extends State<ShiftDetail> {
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
-              width: MediaQuery.of(context).size.width*0.25,
+              width: MediaQuery.of(context).size.width * 0.25,
               child: Text(e['staff_name'])),
           Container(
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width*0.25,
+              width: MediaQuery.of(context).size.width * 0.25,
               child: Text(_subject, style: TextStyle(color: _color))),
           // Container(
           //     decoration: BoxDecoration(
@@ -254,20 +294,26 @@ class _ShiftDetail extends State<ShiftDetail> {
           //     width: 100,
           //     child: Text(_subject, style: TextStyle(color: _color))),
           GestureDetector(
-            onTap: e['from_time'] != null ? () {
-              changeTimeZone(_index, e);
-            } : null,
+            onTap: e['from_time'] != null
+                ? () {
+                    changeTimeZone(_index, e);
+                  }
+                : null,
             child: Container(
-                decoration: BoxDecoration(
-                    border: Border(
-                        right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
-                alignment: Alignment.center,
-                width: MediaQuery.of(context).size.width*0.25-20,
-                child:
-                Text(
-                  e['from_time'] != null ? '${e['from_time']} ~ ${e['to_time']}' : '',
-                  style: const TextStyle(fontSize: 12, color: Colors.blue, decoration: TextDecoration.underline),
-                ),
+              decoration: BoxDecoration(
+                  border: Border(
+                      right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
+              alignment: Alignment.center,
+              width: MediaQuery.of(context).size.width * 0.25 - 20,
+              child: Text(
+                e['from_time'] != null
+                    ? '${e['from_time']} ~ ${e['to_time']}'
+                    : '',
+                style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.blue,
+                    decoration: TextDecoration.underline),
+              ),
             ),
           ),
           const SizedBox(width: 12),

@@ -18,7 +18,7 @@ class PrimaryButton extends StatelessWidget {
     return Expanded(
         child: ElevatedButton(
       style: ElevatedButton.styleFrom(
-        primary: Color(0xff117fc1),
+        backgroundColor: const Color(0xff117fc1),
       ),
       onPressed: tapFunc,
       child: Text(label, style: btnTxtStyle),

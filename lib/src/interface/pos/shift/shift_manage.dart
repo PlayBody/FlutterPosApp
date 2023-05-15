@@ -125,8 +125,8 @@ class _ShiftManage extends State<ShiftManage> {
     if (selOrganId == null) return;
     Dialogs().loaderDialogNormal(context);
 
-    await ShiftHelper().autoShiftSet(context, datas, selOrganId,
-        '$showFromDate 00:00:00', '$showToDate 23:59:59');
+    await ShiftHelper().autoShiftSet(
+        context, selOrganId, '$showFromDate 00:00:00', '$showToDate 23:59:59');
     Navigator.pop(context);
 
     loadChangeData();
@@ -332,10 +332,8 @@ class _ShiftManage extends State<ShiftManage> {
           tapFunc:
               globals.saveControlShifts.isNotEmpty ? () => onTapSave() : null),
       const SizedBox(width: 8),
-      PrimaryButton(
-          label: '自動調整',
-          tapFunc:
-              globals.saveControlShifts.isEmpty ? () => onTapAuto() : null),
+      PrimaryButton(label: '自動調整', tapFunc: () => onTapAuto()),
+      // globals.saveControlShifts.isEmpty ? () => onTapAuto() : null),
       const SizedBox(width: 8),
       CancelButton(label: '戻る', tapFunc: () => Navigator.pop(context)),
     ]);

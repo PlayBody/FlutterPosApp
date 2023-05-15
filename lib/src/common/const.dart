@@ -46,6 +46,17 @@ const String constShiftMeReply = '7';
 const String constShiftMeApply = '9';
 const String constShiftApply = '10';
 
+const List<String> constShiftUsingList = [
+  '1',
+  '2',
+  '3',
+  '5',
+  '6',
+  '7',
+  '9',
+  '10'
+];
+
 //var c = Colors.blue;
 const constShiftAppoints = {
   constShiftSubmit: {'color': '0xff2196f3', 'subject': '申請中', 'note': ''},

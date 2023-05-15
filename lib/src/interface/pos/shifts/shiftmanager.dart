@@ -771,13 +771,13 @@ class _ShiftManager extends State<ShiftManager> {
     return RowButtonGroup(widgets: [
       PrimaryButton(label: '保存', tapFunc: () => saveShiftComplete()),
       SizedBox(width: 8),
-      PrimaryButton(
-          label: '自動調整',
-          tapFunc: () async {
-            await autoControl();
-            clacCountingShift();
-            setState(() {});
-          }),
+      // PrimaryButton(
+      //     label: '自動調整',
+      //     tapFunc: () async {
+      //       await autoControl();
+      //       clacCountingShift();
+      //       setState(() {});
+      //     }),
       SizedBox(width: 8),
       CancelButton(label: '戻る', tapFunc: () => Navigator.pop(context)),
     ]);

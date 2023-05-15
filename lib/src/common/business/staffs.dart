@@ -151,6 +151,9 @@ class ClStaff {
     if (!results['isLoad']) return [];
     List<StaffListModel> staffs = [];
     for (var item in results['staffs']) {
+      if (item['staff_auth'] != null && item['staff_auth'] == '5') {
+        continue;
+      }
       staffs.add(StaffListModel.fromJson(item));
     }
     return staffs;

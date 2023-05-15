@@ -51,7 +51,6 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
   }
 
   Future<List> loadInitData() async {
-    staffs = await ClStaff().loadStaffs(context, {'organ_id': widget.organId});
     shifts = await ClShift().loadShifts(context, {
       'organ_id': widget.organId,
       'in_from_time': fromDate,
@@ -150,9 +149,8 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
                   child: Column(children: [
                     Text(Funcs().dateFormatJP1(
                         DateFormat('yyyy-MM-dd HH:mm:ss').format(widget.from))),
-                    Text(DateFormat('HH:mm').format(widget.from) +
-                        ' ~ ' +
-                        DateFormat('HH:mm').format(widget.to))
+                    Text(
+                        '${DateFormat('HH:mm').format(widget.from)} ~ ${DateFormat('HH:mm').format(widget.to)}')
                   ]))),
           IconButton(
               onPressed: () => onTapClose(), icon: const Icon(Icons.close))
@@ -172,35 +170,39 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
   }
 
   Widget _getRowContent(e) {
-    var _appointments = constShiftAppoints[e['shift_type']];
-    String _subject = '';
-    var _color = Colors.black;
-    if (_appointments != null) {
-      if (_appointments['subject'] != null)
-        _subject = _appointments['subject']!;
-      if (_appointments['color'] != null)
-        _color = Color(int.parse(_appointments['color']!));
+    var appointments = constShiftAppoints[e['shift_type']];
+    String subject = '';
+    var colorText = Colors.black;
+    if (appointments != null) {
+      if (appointments['subject'] != null) {
+        subject = appointments['subject']!;
+      }
+      if (appointments['color'] != null) {
+        colorText = Color(int.parse(appointments['color']!));
+      }
     }
-    String _shiftType = e['shift_type'] == null ? '' : e['shift_type'];
-    var _search = globals.saveControlShifts.where((element) =>
+    String shiftType = e['shift_type'] ?? ''; // == null ? '' : e['shift_type'];
+    var search = globals.saveControlShifts.where((element) =>
         element['staff_id'] == e['staff_id'] &&
         element['from_time'] == fromDate &&
         element['to_time'] == toDate);
-    var _saveRow = _search.length > 0 ? _search.first : null;
+    var saveRow = search.isNotEmpty ? search.first : null;
 
-    String _changeType = '';
-    int? _index;
-    if (_saveRow != null) {
-      _changeType = _saveRow['shift_type'];
-      _index = globals.saveControlShifts.indexOf(_saveRow);
+    String changeType = '';
+    int? index;
+    if (saveRow != null) {
+      changeType = saveRow['shift_type'];
+      index = globals.saveControlShifts.indexOf(saveRow);
     }
 
-    String _reserveStatus = '';
-    if (e['reserve_type'] != null && e['reserve_type'] == constReserveRequest)
-      _reserveStatus = '予約申込';
+    String reserveStatus = '';
+    if (e['reserve_type'] != null && e['reserve_type'] == constReserveRequest) {
+      reserveStatus = '予約申込'; // 예약신청.
+    }
 
-    if (e['reserve_type'] != null && e['reserve_type'] == constReserveApply)
-      _reserveStatus = '予約済み';
+    if (e['reserve_type'] != null && e['reserve_type'] == constReserveApply) {
+      reserveStatus = '予約済み'; // 예약됨.
+    }
 
     return Container(
         decoration: BoxDecoration(
@@ -221,39 +223,37 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               alignment: Alignment.center,
               width: 100,
-              child: Text(_subject, style: TextStyle(color: _color))),
+              child: Text(subject, style: TextStyle(color: colorText))),
           Container(
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               alignment: Alignment.center,
               width: 60,
-              child:
-                  Text(_reserveStatus, style: const TextStyle(fontSize: 12))),
+              child: Text(reserveStatus, style: const TextStyle(fontSize: 12))),
           const SizedBox(width: 12),
-          if (_shiftType == constShiftSubmit || _shiftType == constShiftReject)
+          if (shiftType == constShiftSubmit || shiftType == constShiftReject)
             _getIconButtonItem(Icons.check, Colors.green, constShiftApply,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeReply ||
-              _shiftType == constShiftMeApply)
+                changeType, index, e['staff_id']),
+          if (shiftType == constShiftMeReply || shiftType == constShiftMeApply)
             _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeReply)
+                changeType, index, e['staff_id']),
+          if (shiftType == constShiftMeReply)
             _getIconButtonItem(Icons.check, Colors.green, constShiftMeApply,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeApply)
+                changeType, index, e['staff_id']),
+          if (shiftType == constShiftMeApply)
             const Icon(Icons.check, color: Colors.orange),
-          if (_shiftType == constShiftSubmit || _shiftType == constShiftApply)
+          if (shiftType == constShiftSubmit || shiftType == constShiftApply)
             _getIconButtonItem(Icons.close, Colors.red, constShiftReject,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftOut ||
-              _shiftType == '' ||
-              _shiftType == constShiftRest)
+                changeType, index, e['staff_id']),
+          if (shiftType == constShiftOut ||
+              shiftType == '' ||
+              shiftType == constShiftRest)
             _getIconButtonItem(Icons.send, Colors.blue, constShiftRequest,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftRequest)
+                changeType, index, e['staff_id']),
+          if (shiftType == constShiftRequest)
             _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject,
-                _changeType, _index, e['staff_id']),
+                changeType, index, e['staff_id']),
           // _getIconButtonItem(Icons.cancel, Colors.orange, '0', _changeType,
           //     _index, e['staff_id']),
         ]));
@@ -261,7 +261,7 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
 
   Widget _getIconButtonItem(icon, color, trueValue, value, index, staffId) =>
       Container(
-        margin: EdgeInsets.symmetric(horizontal: 4),
+        margin: const EdgeInsets.symmetric(horizontal: 4),
         width: 25,
         child: IconWhiteButton(
           icon: icon,

@@ -18,7 +18,7 @@ class StaffListModel {
       staffFirstName: json['staff_first_name'],
       staffLastName: json['staff_last_name'],
       staffNick: json['staff_nick'] ?? '',
-      auth: json['auth'],
+      auth: json['staff_auth'],
     );
   }
 }
