@@ -3,6 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:staff_pos_app/src/common/business/orders.dart';
 import 'package:staff_pos_app/src/common/business/organ.dart';
 import 'package:staff_pos_app/src/common/business/shift.dart';
+import 'package:staff_pos_app/src/common/business/staffs.dart';
 import 'package:staff_pos_app/src/common/dialogs.dart';
 import 'package:staff_pos_app/src/common/functions/datetimes.dart';
 import 'package:staff_pos_app/src/common/functions/shifts.dart';
@@ -15,6 +16,7 @@ import 'package:staff_pos_app/src/common/globals.dart' as globals;
 import 'package:staff_pos_app/src/interface/components/texts.dart';
 import 'package:staff_pos_app/src/interface/pos/manage/shifts/settingshiftinit.dart';
 import 'package:staff_pos_app/src/interface/pos/shift/shift_manage.dart';
+import 'package:staff_pos_app/src/interface/pos/staffs/stafflist.dart';
 import 'package:staff_pos_app/src/model/order_model.dart';
 import 'package:staff_pos_app/src/model/organmodel.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
@@ -76,6 +78,13 @@ class _ShiftMake extends State<ShiftMake> {
         .loadActiveShiftRegions(context, selOrganId!, showFromDate);
     regions.addAll(await ClShift()
         .loadColorShiftCountsByWeek(context, selOrganId!, fromTime, toTime));
+
+    globals.shiftWeekPlanMinute = 0;
+    var staffs = await ClStaff().loadStaffs(context, {'organ_id': selOrganId});
+    for (var sta in staffs) {
+      globals.shiftWeekPlanMinute += sta.staffShift ?? 0;
+    }
+    globals.shiftWeekPlanMinute *= 60;
 
     List<ShiftModel> shifts = await ClShift().loadShifts(context, {
       'organ_id': selOrganId,

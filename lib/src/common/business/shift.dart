@@ -195,10 +195,10 @@ class ClShift {
       'organ_id': organId
     }).then((value) => results = value);
 
-    if (results['isLoad']) {
-      globals.shiftWeekPlanMinute = int.parse(results['staff_times']);
-      return true;
-    }
+    // if (results['isLoad']) {
+    //   globals.shiftWeekPlanMinute = int.parse(results['staff_times']);
+    //   return true;
+    // }
 
     return false;
   }

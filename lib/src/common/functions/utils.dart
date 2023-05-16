@@ -13,8 +13,8 @@ class WorkTime {
     hoursOnWeek = {};
   }
 
-  static void updateHoursOnWeek(String key, int duration) {
-    hoursOnWeek[key] = (hoursOnWeek[key] ?? 0) + duration;
+  static void updateHoursOnWeek(String? key, int? duration) {
+    hoursOnWeek[key ?? "_"] = duration ?? 0;
   }
 
   factory WorkTime.fromWorkTime(WorkTime other) {
@@ -25,7 +25,7 @@ class WorkTime {
   }
 
   bool isChanged() {
-    return start.compareTo(oldStart) > 0 || end.compareTo(oldEnd) < 0;
+    return start.compareTo(oldStart) < 0 || end.compareTo(oldEnd) > 0;
   }
 
   // like left join
@@ -101,7 +101,7 @@ class WorkTime {
   }
 
   int compareToByHoursOnWeek(WorkTime other) {
-    return getHoursOnWeek().compareTo(other.getHoursOnWeek());
+    return -getHoursOnWeek().compareTo(other.getHoursOnWeek());
   }
 
   int compareToByDuration(WorkTime other) {

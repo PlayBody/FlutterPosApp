@@ -53,24 +53,23 @@ class ShiftManageModel {
         }
       }
       if (i == newWorks.length) {
-        //work.meta.fromTime = work.meta.toTime;
         work.meta.shiftType = constShiftReject;
-        work.meta.toTime = work.meta.fromTime;
-        if (work.meta.shiftType.compareTo(constShiftApply) == 0 ||
-            work.meta.shiftType.compareTo(constShiftMeApply) == 0) {
-          work.meta.shiftType = constShiftReject;
-        }
+        // if (work.meta.shiftType.compareTo(constShiftApply) == 0 ||
+        //     work.meta.shiftType.compareTo(constShiftMeApply) == 0) {
+        // }
         newShifts.add(ShiftModel.fromWorkTime(work));
       } else {
-        if (work.meta.shiftType.compareTo(constShiftApply) == 0 ||
-            work.meta.shiftType.compareTo(constShiftMeApply) == 0) {
-          if (work.isChanged()) {
-            work.meta.shiftType = constShiftRequest;
-          }
+        var nw = newWorks[i];
+        if (nw.isChanged()) {
+          nw.meta.shiftType = constShiftRequest;
         } else {
-          work.meta.shiftType = constShiftRequest;
+          if (nw.meta.shiftType.compareTo(constShiftApply) == 0 ||
+              nw.meta.shiftType.compareTo(constShiftMeApply) == 0) {
+          } else {
+            nw.meta.shiftType = constShiftMeApply;
+          }
         }
-        newShifts.add(ShiftModel.fromWorkTime(newWorks[i]));
+        newShifts.add(ShiftModel.fromWorkTime(nw));
       }
     }
 

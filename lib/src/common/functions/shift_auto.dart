@@ -1,10 +1,8 @@
 import 'package:intl/intl.dart';
-import 'package:staff_pos_app/src/common/apiendpoint.dart';
 import 'package:staff_pos_app/src/common/business/shift.dart';
 import 'package:staff_pos_app/src/common/business/staffs.dart';
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/functions/utils.dart';
-import 'package:staff_pos_app/src/http/webservice.dart';
 import 'package:staff_pos_app/src/model/shift_manage_model.dart';
 import 'package:staff_pos_app/src/common/globals.dart' as globals;
 import 'package:staff_pos_app/src/model/shift_model.dart';
@@ -25,7 +23,7 @@ class ShiftHelper {
                 .first
             : null;
         if (tempShift != null) {
-          if (constShiftUsingList.contains(tempShift.shiftType)) {
+          if (constShiftAutoUsingList.contains(tempShift.shiftType)) {
             ms.add(tempShift);
           }
         }
@@ -42,7 +40,11 @@ class ShiftHelper {
     globals.saveControlShifts = [];
     Map<dynamic, dynamic> results = {};
 
+    WorkTime.cleanHoursOnWeek();
     var staffs = await ClStaff().loadStaffs(context, {'organ_id': organId});
+    for (var sta in staffs) {
+      WorkTime.updateHoursOnWeek(sta.staffId, sta.staffShift);
+    }
 
     /*
       ShiftManageModel: [
@@ -64,7 +66,6 @@ class ShiftHelper {
 
     // datas = getCleanShiftManageModels(staffs, datas);
 
-    WorkTime.cleanHoursOnWeek();
     List<List<ShiftModel>> models = [];
     for (ShiftManageModel data in datas) {
       List<ShiftModel> shifts = await ClShift().loadShifts(context, {
@@ -81,9 +82,7 @@ class ShiftHelper {
             ? shifts.where((element) => element.staffId == sta.staffId).first
             : null;
         if (tempShift != null) {
-          if (constShiftUsingList.contains(tempShift.shiftType)) {
-            WorkTime.updateHoursOnWeek(
-                sta.staffId ?? '_', tempShift.getDurationByMinute());
+          if (constShiftAutoUsingList.contains(tempShift.shiftType)) {
             ms.add(tempShift);
           }
         }
@@ -97,6 +96,13 @@ class ShiftHelper {
           models[i], data.fromTime, data.toTime);
 
       for (var element in models[i]) {
+        // globals.saveControlShifts.add({
+        //   'staff_id': element.staffId,
+        //   'from_time':
+        //       DateFormat('yyyy-MM-dd HH:mm:ss').format(element.fromTime),
+        //   'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(element.toTime),
+        //   'shift_type': element.shiftType
+        // });
         await ClShift().updateShiftTime(context, element.shiftId,
             element.fromTime.toString(), element.toTime.toString());
         await ClShift()

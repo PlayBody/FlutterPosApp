@@ -76,6 +76,7 @@ class _ShiftDetail extends State<ShiftDetail> {
           : ('${sta.staffFirstName} ${sta.staffLastName}');
       data['staff_id'] = sta.staffId;
       data['auth'] = sta.auth;
+      data['staff_shift'] = sta.staffShift;
       ShiftModel? tempShift =
           shifts.where((element) => element.staffId == sta.staffId).isNotEmpty
               ? shifts.where((element) => element.staffId == sta.staffId).first
@@ -101,42 +102,47 @@ class _ShiftDetail extends State<ShiftDetail> {
     // 빈 사람들은 그다음.
     // 다음 나머지.
     detailData.sort((m1, m2) {
-      List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
-      var st1 = m1['shift_type'];
-      var st2 = m2['shift_type'];
-      if (st1 == null) {
-        if (st2 == null) {
-          return m1['staff_id'].compareTo(m2['staff_id']);
-        } else {
-          if (reqs.contains(st2)) {
-            return 1;
+      int ss = -((m1['staff_shift'] ?? 0).compareTo(m2['staff_shift'] ?? 0));
+      if (ss == 0) {
+        List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
+        var st1 = m1['shift_type'];
+        var st2 = m2['shift_type'];
+        if (st1 == null) {
+          if (st2 == null) {
+            return m1['staff_id'].compareTo(m2['staff_id']);
           } else {
-            return -1;
+            if (reqs.contains(st2)) {
+              return 1;
+            } else {
+              return -1;
+            }
+          }
+        } else {
+          if (st2 == null) {
+            if (reqs.contains(st1)) {
+              return -1;
+            } else {
+              return 1;
+            }
+          } else {
+            if (st1.compareTo(st2) != 0) {
+              int aa, bb;
+              aa = reqs.indexOf(st1);
+              bb = reqs.indexOf(st2);
+              return aa == bb
+                  ? 0
+                  : aa < bb
+                      ? -1
+                      : 1;
+            }
+            if (m1['from_time'] != null && m2['from_time'] != null) {
+              return m1['from_time'].compareTo(m2['from_time']);
+            }
+            return m1['staff_id'].compareTo(m2['staff_id']);
           }
         }
       } else {
-        if (st2 == null) {
-          if (reqs.contains(st1)) {
-            return -1;
-          } else {
-            return 1;
-          }
-        } else {
-          if (st1.compareTo(st2) != 0) {
-            int aa, bb;
-            aa = reqs.indexOf(st1);
-            bb = reqs.indexOf(st2);
-            return aa == bb
-                ? 0
-                : aa < bb
-                    ? -1
-                    : 1;
-          }
-          if (m1['from_time'] != null && m2['from_time'] != null) {
-            return m1['from_time'].compareTo(m2['from_time']);
-          }
-          return m1['staff_id'].compareTo(m2['staff_id']);
-        }
+        return ss;
       }
     });
 
@@ -270,21 +276,21 @@ class _ShiftDetail extends State<ShiftDetail> {
         decoration: BoxDecoration(
             border: Border(
                 bottom: BorderSide(color: Colors.grey.withOpacity(0.5)))),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 6),
         child: Row(children: [
           Container(
               alignment: Alignment.centerLeft,
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
-              width: MediaQuery.of(context).size.width * 0.25,
-              child: Text(e['staff_name'])),
+              width: MediaQuery.of(context).size.width * 0.3,
+              child: Text('${e['staff_name']} (${e['staff_shift']})')),
           Container(
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               alignment: Alignment.center,
-              width: MediaQuery.of(context).size.width * 0.25,
+              width: MediaQuery.of(context).size.width * 0.2,
               child: Text(_subject, style: TextStyle(color: _color))),
           // Container(
           //     decoration: BoxDecoration(
@@ -316,7 +322,7 @@ class _ShiftDetail extends State<ShiftDetail> {
               ),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 10),
           if (_shiftType == constShiftSubmit || _shiftType == constShiftReject)
             _getIconButtonItem(Icons.check, Colors.green, constShiftApply,
                 _changeType, _index, e['staff_id']),

@@ -287,7 +287,7 @@ class _ShiftDetailPannel extends State<ShiftDetailPannel> {
         globals.saveControlShifts.elementAt(index)['shift_type'] = trueValue;
       }
     }
-    print(globals.saveControlShifts);
+    // print(globals.saveControlShifts);
     setState(() {});
   }
 }

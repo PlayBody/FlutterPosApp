@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 const String consAndroidStore =
     'https://play.google.com/apps/internaltest/4701332527315630553';
 
-const int constIsTestApi = 0;
+const int constIsTestApi = 1;
 
 // ---------------- Permission Manager -----------------------
 const int constAuthGuest = 0;
@@ -46,10 +46,9 @@ const String constShiftMeReply = '7';
 const String constShiftMeApply = '9';
 const String constShiftApply = '10';
 
-const List<String> constShiftUsingList = [
+const List<String> constShiftAutoUsingList = [
   '1',
   '2',
-  '3',
   '5',
   '6',
   '7',

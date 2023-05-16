@@ -4,13 +4,15 @@ class StaffListModel {
   final String? staffLastName;
   final String staffNick;
   final String? auth;
+  final int? staffShift;
 
   const StaffListModel(
       {this.staffId,
       this.staffFirstName,
       this.staffLastName,
       required this.staffNick,
-      this.auth});
+      this.auth,
+      this.staffShift});
 
   factory StaffListModel.fromJson(Map<String, dynamic> json) {
     return StaffListModel(
@@ -19,6 +21,7 @@ class StaffListModel {
       staffLastName: json['staff_last_name'],
       staffNick: json['staff_nick'] ?? '',
       auth: json['staff_auth'],
+      staffShift: int.parse(json['staff_shift']),
     );
   }
 }

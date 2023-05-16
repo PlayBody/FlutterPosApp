@@ -28,8 +28,8 @@ class Webservice {
               "Content-Type": "application/x-www-form-urlencoded"
             },
             body: param);
+        print('\t\tRes: ${response.body}');
         if (response.statusCode == 200) {
-          print('\t\tRes: ${response.body}');
           return jsonDecode(response.body);
         } else {
           conf = await Dialogs().retryOrExit(context, errServerString);
