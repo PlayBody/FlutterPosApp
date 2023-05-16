@@ -38,13 +38,14 @@ class ShiftHelper {
         await ClShift().loadShiftManagePsg(context, organId, fromTime, toTime);
 
     globals.saveControlShifts = [];
-    Map<dynamic, dynamic> results = {};
 
     WorkTime.cleanHoursOnWeek();
     var staffs = await ClStaff().loadStaffs(context, {'organ_id': organId});
     for (var sta in staffs) {
       WorkTime.updateHoursOnWeek(sta.staffId, sta.staffShift);
     }
+
+    staffs.sort((a, b) => -(a.staffShift ?? 0).compareTo(b.staffShift ?? 0));
 
     /*
       ShiftManageModel: [
@@ -67,6 +68,7 @@ class ShiftHelper {
     // datas = getCleanShiftManageModels(staffs, datas);
 
     List<List<ShiftModel>> models = [];
+    List<List<ShiftModel>> skipModels = [];
     for (ShiftManageModel data in datas) {
       List<ShiftModel> shifts = await ClShift().loadShifts(context, {
         'organ_id': organId,
@@ -75,6 +77,7 @@ class ShiftHelper {
       });
 
       List<ShiftModel> ms = [];
+      List<ShiftModel> skipMs = [];
       for (var sta in staffs) {
         ShiftModel? tempShift = shifts
                 .where((element) => element.staffId == sta.staffId)
@@ -84,16 +87,21 @@ class ShiftHelper {
         if (tempShift != null) {
           if (constShiftAutoUsingList.contains(tempShift.shiftType)) {
             ms.add(tempShift);
+          } else {
+            skipMs.add(tempShift);
           }
         }
       }
+
       models.add(ms);
+      skipModels.add(skipMs);
     }
 
     for (int i = 0; i < datas.length; i++) {
       ShiftManageModel data = datas[i];
-      models[i] = ShiftManageModel.autoAssignTimes(
-          models[i], data.fromTime, data.toTime);
+      //  개수변수를 앞으로 리용해야 한다.: data.count;
+      models[i] = ShiftManageModel.autoAssignTimes(models[i], data.fromTime,
+          data.toTime, data.count, staffs, skipModels[i], organId);
 
       for (var element in models[i]) {
         // globals.saveControlShifts.add({
@@ -103,10 +111,18 @@ class ShiftHelper {
         //   'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(element.toTime),
         //   'shift_type': element.shiftType
         // });
-        await ClShift().updateShiftTime(context, element.shiftId,
-            element.fromTime.toString(), element.toTime.toString());
-        await ClShift()
-            .updateShiftStatus(context, element.shiftId, element.shiftType);
+        await ClShift().forceSaveShift(
+            context,
+            element.staffId,
+            element.organId,
+            element.shiftId,
+            element.fromTime.toString(),
+            element.toTime.toString(),
+            element.shiftType);
+        // await ClShift().updateShiftTime(context, element.shiftId,
+        //     element.fromTime.toString(), element.toTime.toString());
+        // await ClShift()
+        //     .updateShiftStatus(context, element.shiftId, element.shiftType);
       }
     }
 

@@ -185,6 +185,21 @@ class ClShift {
     return appointments;
   }
 
+  Future<bool> forceSaveShift(context, String staffId, String organId,
+      String shiftId, String fromTime, String toTime, String shiftType) async {
+    String apiUrl = '$apiBase/apis/shift/shifts/forceSaveShift';
+
+    await Webservice().loadHttp(context, apiUrl, {
+      'staff_id': staffId,
+      'organ_id': organId,
+      'shift_id': shiftId,
+      'from_time': fromTime,
+      'to_time': toTime,
+      'shift_type': shiftType,
+    }).then((value) => null);
+    return true;
+  }
+
   Future<bool> loadStaffShiftTime(
       context, String staffId, String organId) async {
     Map<dynamic, dynamic> results = {};
@@ -213,7 +228,7 @@ class ClShift {
     await Webservice().loadHttp(context, apiUrl, {'organ_id': organId}).then(
         (value) => results = value);
 
-    List<WorkTime> ditv = List.empty(growable: true);
+    // List<WorkTime> ditv = List.empty(growable: true);
 
     for (var item in results['shift_times']) {
       var startDate = DateTime.parse('$firstDate ${item['from_time']}')
@@ -221,7 +236,7 @@ class ClShift {
       var endDate = DateTime.parse('$firstDate ${item['to_time']}')
           .add(Duration(days: int.parse(item['weekday']) - 1));
 
-      ditv.add(WorkTime(startDate, endDate));
+      // ditv.add(WorkTime(startDate, endDate));
 
       regions.add(TimeRegion(
           startTime: startDate,
@@ -247,7 +262,7 @@ class ClShift {
       var from = DateTime.parse(item['from_time']);
       var to = DateTime.parse(item['to_time']);
 
-      ditv.add(WorkTime(from, to));
+      // ditv.add(WorkTime(from, to));
 
       regions.add(TimeRegion(
           startTime: from,
@@ -258,7 +273,7 @@ class ClShift {
           text: ''));
     }
 
-    globals.shiftWeekStaffMinute = WorkTimeUtil.getTotalMinutes(ditv);
+    // globals.shiftWeekStaffMinute = WorkTimeUtil.getTotalMinutes(ditv);
 
     return regions;
   }

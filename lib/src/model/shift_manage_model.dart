@@ -1,6 +1,7 @@
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/functions/utils.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
+import 'package:staff_pos_app/src/model/stafflistmodel.dart';
 
 class ShiftManageModel {
   final DateTime fromTime;
@@ -36,7 +37,13 @@ class ShiftManageModel {
   }
 
   static dynamic autoAssignTimes(
-      List<ShiftModel> shifts, DateTime fromTime, DateTime toTime) {
+      List<ShiftModel> shifts,
+      DateTime fromTime,
+      DateTime toTime,
+      int requireCount,
+      List<StaffListModel> staffs,
+      List<ShiftModel> skips,
+      String organId) {
     List<WorkTime> works = [];
     for (var item in shifts) {
       works.add(WorkTime(item.fromTime, item.toTime)..meta = item);
@@ -70,6 +77,26 @@ class ShiftManageModel {
           }
         }
         newShifts.add(ShiftModel.fromWorkTime(nw));
+      }
+    }
+
+    // 자동조절할수 있는 요청목록이 없으면 요청목록을 강제로 만들어 내려보낸다.
+    // 여기서 staffs 변수는 이미 sort된것이 들어온다고 가정한다.
+    if (newShifts.isEmpty) {
+      for (var sta in staffs) {
+        if (skips
+            .map((e) => e.staffId.compareTo(sta.staffId ?? '__') == 0)
+            .isEmpty) {
+          ShiftModel m = ShiftModel(
+              shiftId: '-1',
+              organId: organId,
+              staffId: sta.staffId ?? '',
+              fromTime: fromTime,
+              toTime: toTime,
+              shiftType: constShiftRequest);
+          newShifts.add(m);
+          break;
+        }
       }
     }
 

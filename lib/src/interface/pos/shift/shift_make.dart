@@ -71,27 +71,37 @@ class _ShiftMake extends State<ShiftMake> {
     organList = await ClOrgan().loadOrganList(context, '', globals.staffId);
     selOrganId ??= organList.first.organId;
 
-    bool isLoad = await ClShift()
-        .loadStaffShiftTime(context, globals.staffId, selOrganId!);
+    // bool isLoad = await ClShift()
+    //     .loadStaffShiftTime(context, globals.staffId, selOrganId!);
 
     regions = await ClShift()
         .loadActiveShiftRegions(context, selOrganId!, showFromDate);
+
     regions.addAll(await ClShift()
         .loadColorShiftCountsByWeek(context, selOrganId!, fromTime, toTime));
 
     globals.shiftWeekPlanMinute = 0;
     var staffs = await ClStaff().loadStaffs(context, {'organ_id': selOrganId});
     for (var sta in staffs) {
-      globals.shiftWeekPlanMinute += sta.staffShift ?? 0;
+      if (globals.staffId.compareTo(sta.staffId ?? '__') == 0) {
+        globals.shiftWeekPlanMinute = (sta.staffShift ?? 0) * 60;
+      }
     }
-    globals.shiftWeekPlanMinute *= 60;
 
+    globals.shiftWeekStaffMinute = 0;
     List<ShiftModel> shifts = await ClShift().loadShifts(context, {
       'organ_id': selOrganId,
       'staff_id': globals.staffId,
       'from_time': fromTime,
       'to_time': toTime
     });
+    for (var s in shifts) {
+      if (constShiftAutoUsingList.contains(s.shiftType) &&
+          s.toTime.compareTo(s.fromTime) > 0) {
+        globals.shiftWeekStaffMinute +=
+            s.toTime.difference(s.fromTime).inMinutes;
+      }
+    }
 
     appointments = FuncShifts().getAppoinsFromList(shifts);
     var minMaxHour = await ClOrgan().loadOrganShiftMinMaxHour(
@@ -186,9 +196,10 @@ class _ShiftMake extends State<ShiftMake> {
   }
 
   bool isOldDate() {
+    return true;
     DateTime _showEndDate = DateTime.parse(showToDate + ' 23:59:59');
     if (_showEndDate.isBefore(DateTime.now())) {
-      Dialogs().infoDialog(context, '使用できません。');
+      Dialogs().infoDialog(context, '使用できません。'); // 사용할수 없습니다.
       return false;
     }
     return true;
@@ -282,40 +293,58 @@ class _ShiftMake extends State<ShiftMake> {
         globals.shiftWeekPlanMinute - globals.shiftWeekStaffMinute;
     restPlanMinutes = restPlanMinutes > 0 ? restPlanMinutes : 0;
     return Container(
-      padding: EdgeInsets.only(top: 10, bottom: 5, left: 8),
-      child: Row(children: [
-        Expanded(
-            // child: SubHeaderText(
-            //     label: DateTimes().convertJPYMFromString(showFromDate)),
-            // Approval Time , Job Application Time
+        padding: EdgeInsets.only(top: 10, bottom: 5, left: 8),
+        child: Column(children: [
+          Row(
+            children: [
+              // Expanded(
+              //     // child: SubHeaderText(
+              //     //     label: DateTimes().convertJPYMFromString(showFromDate)),
+              //     // Approval Time , Job Application Time
 
-            // child: Text(
-            //     '承認時間 ${globals.shiftWeekPlanMinute} 分\n勤務申請時間 ${globals.shiftWeekStaffMinute} 分'),
-            child: Text('週間出勤希望時間-(申請中+承認): $restPlanMinutes分')),
-        // child: Text(
-        //     'A: ${globals.shiftWeekPlanMinute} \nB: ${globals.shiftWeekStaffMinute}')),
-        Container(
-          child: WhiteButton(label: '標準設定適用', tapFunc: () => onTapInitButton()),
-        ),
-        SizedBox(width: 8),
-        Container(
-          child: WhiteButton(label: '設定画面へ', tapFunc: () => onTapPushSetting()),
-        ),
-        PopupMenuButton(
-            onSelected: (v) => onChangeCalanderDuring(v),
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-                  PopupMenuItem<String>(
-                      value: '15',
-                      child: Text('15分間間隔で表示', style: TextStyle(fontSize: 12))),
-                  PopupMenuItem<String>(
-                      value: '30',
-                      child: Text('30分間間隔で表示', style: TextStyle(fontSize: 12))),
-                  PopupMenuItem<String>(
-                      value: '60',
-                      child: Text('60分間間隔で表示', style: TextStyle(fontSize: 12))),
-                ]),
-      ]),
-    );
+              //     // child: Text(
+              //     //     '承認時間 ${globals.shiftWeekPlanMinute} 分\n勤務申請時間 ${globals.shiftWeekStaffMinute} 分'),
+              //     child: Text(),
+              // // child: Text(
+              // //     'A: ${globals.shiftWeekPlanMinute} \nB: ${globals.shiftWeekStaffMinute}')),
+
+              Expanded(
+                  child: Text(
+                '週間出勤希望時間-(申請中+承認): ${restPlanMinutes ~/ 60}時間 ${restPlanMinutes % 60}分',
+                textAlign: TextAlign.center,
+              ))
+            ],
+          ),
+          Row(children: [
+            SizedBox(width: 18),
+            Container(
+              child: WhiteButton(
+                  label: '     標準設定適用     ', tapFunc: () => onTapInitButton()),
+            ),
+            SizedBox(width: 8),
+            Container(
+              child: WhiteButton(
+                  label: '     設定画面へ    ', tapFunc: () => onTapPushSetting()),
+            ),
+            SizedBox(width: 8),
+            PopupMenuButton(
+                onSelected: (v) => onChangeCalanderDuring(v),
+                itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
+                      PopupMenuItem<String>(
+                          value: '15',
+                          child: Text('15分間間隔で表示',
+                              style: TextStyle(fontSize: 12))),
+                      PopupMenuItem<String>(
+                          value: '30',
+                          child: Text('30分間間隔で表示',
+                              style: TextStyle(fontSize: 12))),
+                      PopupMenuItem<String>(
+                          value: '60',
+                          child: Text('60分間間隔で表示',
+                              style: TextStyle(fontSize: 12))),
+                    ]),
+          ]),
+        ]));
   }
 
   Widget _getOrganDropDown() {
