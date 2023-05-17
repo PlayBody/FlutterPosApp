@@ -97,28 +97,23 @@ class ShiftHelper {
       skipModels.add(skipMs);
     }
 
+    globals.saveShiftFromAutoControl = [];
     for (int i = 0; i < datas.length; i++) {
       ShiftManageModel data = datas[i];
       //  개수변수를 앞으로 리용해야 한다.: data.count;
       models[i] = ShiftManageModel.autoAssignTimes(models[i], data.fromTime,
           data.toTime, data.count, staffs, skipModels[i], organId);
 
-      for (var element in models[i]) {
-        // globals.saveControlShifts.add({
-        //   'staff_id': element.staffId,
-        //   'from_time':
-        //       DateFormat('yyyy-MM-dd HH:mm:ss').format(element.fromTime),
-        //   'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(element.toTime),
-        //   'shift_type': element.shiftType
-        // });
-        await ClShift().forceSaveShift(
-            context,
-            element.staffId,
-            element.organId,
-            element.shiftId,
-            element.fromTime.toString(),
-            element.toTime.toString(),
-            element.shiftType);
+      for (ShiftModel element in models[i]) {
+        globals.saveShiftFromAutoControl.add(element);
+        // await ClShift().forceSaveShift(
+        //     context,
+        //     element.staffId,
+        //     element.organId,
+        //     element.shiftId,
+        //     element.fromTime.toString(),
+        //     element.toTime.toString(),
+        //     element.shiftType);
         // await ClShift().updateShiftTime(context, element.shiftId,
         //     element.fromTime.toString(), element.toTime.toString());
         // await ClShift()

@@ -28,7 +28,9 @@ class Webservice {
               "Content-Type": "application/x-www-form-urlencoded"
             },
             body: param);
-        print('\t\tRes: ${response.body}');
+        if (constIsTestApi == 1) {
+          print('\t\tRes: ${response.body}');
+        }
         if (response.statusCode == 200) {
           return jsonDecode(response.body);
         } else {

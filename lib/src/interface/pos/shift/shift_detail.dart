@@ -62,6 +62,16 @@ class _ShiftDetail extends State<ShiftDetail> {
       'in_to_time': toDate
     });
 
+    // shift update: from auto control shift
+
+    for (var e in globals.saveShiftFromAutoControl) {
+      for (int i = 0; i < shifts.length; i++) {
+        if (shifts[i].staffId == e.staffId && shifts[i].organId == e.organId) {
+          shifts[i] = e;
+        }
+      }
+    }
+
     orders = await ClOrder().loadOrderList(context, {
       'organ_id': widget.organId,
       'in_from_time': fromDate,
@@ -171,17 +181,22 @@ class _ShiftDetail extends State<ShiftDetail> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: FutureBuilder<List>(
-        future: loadData,
-        builder: (context, snapshot) {
-          if (snapshot.hasData) {
-            return _getBodyContent();
-          } else if (snapshot.hasError) {
-            return Text("${snapshot.error}");
-          }
-          return const Center(child: CircularProgressIndicator());
-        },
+    return WillPopScope(
+      onWillPop: () async {
+        return true;
+      },
+      child: Scaffold(
+        body: FutureBuilder<List>(
+          future: loadData,
+          builder: (context, snapshot) {
+            if (snapshot.hasData) {
+              return _getBodyContent();
+            } else if (snapshot.hasError) {
+              return Text("${snapshot.error}");
+            }
+            return const Center(child: CircularProgressIndicator());
+          },
+        ),
       ),
     );
   }

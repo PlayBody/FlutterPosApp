@@ -80,13 +80,21 @@ class ShiftManageModel {
       }
     }
 
+    // If there is no auto control list do by using staff list
     // 자동조절할수 있는 요청목록이 없으면 요청목록을 강제로 만들어 내려보낸다.
     // 여기서 staffs 변수는 이미 sort된것이 들어온다고 가정한다.
     if (newShifts.isEmpty) {
       for (var sta in staffs) {
-        if (skips
-            .map((e) => e.staffId.compareTo(sta.staffId ?? '__') == 0)
-            .isEmpty) {
+        bool isFindSkip = false;
+        for (var skip in skips) {
+          if (skip.staffId == (sta.staffId ?? '')) {
+            isFindSkip = true;
+            break;
+          }
+        }
+        if (isFindSkip) {
+          continue;
+        } else {
           ShiftModel m = ShiftModel(
               shiftId: '-1',
               organId: organId,

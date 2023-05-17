@@ -196,7 +196,6 @@ class _ShiftMake extends State<ShiftMake> {
   }
 
   bool isOldDate() {
-    return true;
     DateTime _showEndDate = DateTime.parse(showToDate + ' 23:59:59');
     if (_showEndDate.isBefore(DateTime.now())) {
       Dialogs().infoDialog(context, '使用できません。'); // 사용할수 없습니다.
@@ -310,7 +309,7 @@ class _ShiftMake extends State<ShiftMake> {
 
               Expanded(
                   child: Text(
-                '週間出勤希望時間-(申請中+承認): ${restPlanMinutes ~/ 60}時間 ${restPlanMinutes % 60}分',
+                '推奨シフト申請時間まで残り ${restPlanMinutes ~/ 60}時間 ${restPlanMinutes % 60}分',
                 textAlign: TextAlign.center,
               ))
             ],
