@@ -65,10 +65,18 @@ class _ShiftDetail extends State<ShiftDetail> {
     // shift update: from auto control shift
 
     for (var e in globals.saveShiftFromAutoControl) {
+      bool isSetted = false;
       for (int i = 0; i < shifts.length; i++) {
-        if (shifts[i].staffId == e.staffId && shifts[i].organId == e.organId) {
+        if (shifts[i].staffId == e.staffId &&
+            shifts[i].organId == e.organId &&
+            shifts[i].fromTime.day == e.fromTime.day &&
+            shifts[i].fromTime.month == e.fromTime.month) {
           shifts[i] = e;
+          isSetted = true;
         }
+      }
+      if (!isSetted) {
+        shifts.add(e);
       }
     }
 

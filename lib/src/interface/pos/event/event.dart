@@ -41,6 +41,14 @@ class _Event extends State<Event> {
     loadData = loadEventData();
   }
 
+  bool bLoad = false;
+  @override
+  void didChangeDependencies() async {
+    super.didChangeDependencies();
+    // await refreshLoad();
+    // bLoad = true;
+  }
+
   Future<List> loadEventData() async {
     selectedDate = DateTime.now();
     String vFromDateTime = _fromDate + ' 00:00:00';
@@ -202,7 +210,8 @@ class _Event extends State<Event> {
       dataSource: _AppointmentDataSource(appointments),
       onTap: (d) => selectedDate = d.date!,
       onLongPress: (d) => calendarTapped(d),
-      onViewChanged: (d) => changeViewCalander(d.visibleDates[1]),
+      onViewChanged: (d) =>
+          changeViewCalander(d.visibleDates[1] ?? DateTime.now()),
     );
   }
 }

@@ -72,8 +72,8 @@ class UserTicketModel {
     tmp.maxCount = json['max_count'] != 0
         ? json['max_count'].toString()
         : MAX_TICKET_COUNT.toString();
-    tmp.isInfinityCount =
-        int.parse(json['max_count'].toString()) < 0 ? true : false;
+    tmp.isInfinityCount = false;
+    // int.parse(json['max_count'].toString()) < 0 ? true : false;
     return tmp;
   }
 

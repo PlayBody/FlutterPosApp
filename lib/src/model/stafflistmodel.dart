@@ -21,7 +21,8 @@ class StaffListModel {
       staffLastName: json['staff_last_name'],
       staffNick: json['staff_nick'] ?? '',
       auth: json['staff_auth'],
-      staffShift: int.parse(json['staff_shift']),
+      staffShift:
+          json['staff_shift'] == null ? 0 : int.tryParse(json['staff_shift']),
     );
   }
 }
