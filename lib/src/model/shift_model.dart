@@ -1,4 +1,5 @@
-import 'package:staff_pos_app/src/common/functions/utils.dart';
+import 'package:staff_pos_app/src/common/functions/time_util.dart';
+import 'package:staff_pos_app/src/common/functions/work_time.dart';
 
 class ShiftModel {
   final String shiftId;
@@ -26,8 +27,8 @@ class ShiftModel {
         shiftId: work.meta.shiftId,
         organId: work.meta.organId,
         staffId: work.meta.staffId,
-        fromTime: work.start,
-        toTime: work.end,
+        fromTime: work.meta.fromTime,
+        toTime: work.meta.toTime,
         shiftType: work.meta.shiftType);
   }
 
