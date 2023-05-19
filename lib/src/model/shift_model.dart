@@ -5,9 +5,11 @@ class ShiftModel {
   final String shiftId;
   final String organId;
   final String staffId;
-  final DateTime fromTime;
+  DateTime fromTime;
   DateTime toTime;
   String shiftType;
+
+  int uniqueId;
 
   int getDurationByMinute() {
     return toTime.difference(fromTime).inMinutes;
@@ -20,6 +22,7 @@ class ShiftModel {
     required this.fromTime,
     required this.toTime,
     required this.shiftType,
+    this.uniqueId = -1,
   });
 
   factory ShiftModel.fromWorkTime(WorkTime work) {
@@ -29,7 +32,8 @@ class ShiftModel {
         staffId: work.meta.staffId,
         fromTime: work.meta.fromTime,
         toTime: work.meta.toTime,
-        shiftType: work.meta.shiftType);
+        shiftType: work.meta.shiftType,
+        uniqueId: work.meta.uniqueId);
   }
 
   factory ShiftModel.fromJson(Map<String, dynamic> json) {

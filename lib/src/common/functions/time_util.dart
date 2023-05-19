@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:intl/intl.dart';
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
@@ -47,7 +49,7 @@ class WorkTime {
   }
 
   factory WorkTime.fromAutoCalc(String organId, WorkTime other,
-      DateTime weekFirstDay, int week, String staffId) {
+      DateTime weekFirstDay, int week, String staffId, int uniqueId) {
     String shiftType = constShiftApply;
 
     int st = other.st;
@@ -72,7 +74,8 @@ class WorkTime {
         staffId: staffId,
         fromTime: dst,
         toTime: den,
-        shiftType: shiftType);
+        shiftType: shiftType,
+        uniqueId: uniqueId);
     return wt;
   }
 
@@ -122,7 +125,6 @@ class WorkTime {
 class WorkPlan {
   int st = 0;
   int en = 0;
-  int count = 0;
 
   // private
   List<int> req = [];
@@ -131,17 +133,28 @@ class WorkPlan {
   WorkPlan.newInstance() {
     req = List.filled(MINUTE_ON_HOUR, 0);
     now = List.filled(MINUTE_ON_HOUR, 0);
+    st = 0;
+    en = 0;
   }
 
-  WorkPlan(DateTime from, DateTime to, int requireCount) {
-    st = from.hour * 60 + from.minute;
-    en = to.hour * 60 + to.minute;
-    count = requireCount;
-    req = List.filled(MINUTE_ON_HOUR, 0);
-    now = List.filled(MINUTE_ON_HOUR, 0);
+  bool isNull() {
+    return en <= st;
+  }
+
+  void appendPlan(DateTime from, DateTime to, int requireCount) {
+    int tst, ten;
+    tst = from.hour * 60 + from.minute;
+    ten = to.hour * 60 + to.minute;
+    if (st == en) {
+      st = tst;
+      en = ten;
+    } else {
+      st = min(st, tst);
+      en = max(en, ten);
+    }
     int i;
-    for (i = st; i < en; i++) {
-      req[i] = count;
+    for (i = tst; i < ten; i++) {
+      req[i] += requireCount;
     }
   }
 
@@ -204,7 +217,14 @@ class Worker {
 }
 
 class WorkControl {
-  static List<WorkTime> AssignWorkTime(
+  static int _counter = 0;
+
+  static int getGenCounter() {
+    _counter++;
+    return _counter;
+  }
+
+  static List<WorkTime> assignWorkTime(
       List<Worker> workers /** 직원들 */,
       List<WorkPlan> plans /** 계획들 7일 */,
       String organId,
@@ -231,8 +251,8 @@ class WorkControl {
       for (j = 0; j < WEEK_COUNT; j++) {
         // j번째 요일의 출근계획
         WorkPlan plan = plans[j];
-        // 그 요일에 상점에서 사람을 요구하지 않으면 자동무시
-        if (plans[j].count == 0) {
+        // // 그 요일에 상점에서 사람을 요구하지 않으면 자동무시
+        if (plans[j].isNull()) {
           continue;
         }
         // t: 직원의 j 요일에 대한 작업시간 관계를 나타내는 변수
@@ -300,7 +320,7 @@ class WorkControl {
         // j번째 요일의 출근계획
         WorkPlan plan = plans[j];
         // 그 요일에 상점에서 사람을 요구하지 않으면 자동무시
-        if (plans[j].count == 0) {
+        if (plans[j].isNull()) {
           continue;
         }
         // t: 직원의 j 요일에 대한 작업시간 관계를 나타내는 변수
@@ -392,7 +412,7 @@ class WorkControl {
       for (j = 0; j < workTime.length; j++) {
         if (workTime[j].isUpdated()) {
           times.add(WorkTime.fromAutoCalc(organId, workTime[j], weekFirstDay, j,
-              workers[i].meta.staffId ?? ""));
+              workers[i].meta.staffId ?? "", getGenCounter()));
         }
       }
     }

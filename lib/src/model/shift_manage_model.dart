@@ -3,9 +3,9 @@ import 'package:staff_pos_app/src/model/shift_model.dart';
 class ShiftManageModel {
   final DateTime fromTime;
   final DateTime toTime;
-  final int count;
-  final int apply;
-  final int shift;
+  int count;
+  int apply;
+  int shift;
   List<ShiftModel> shifts;
 
   ShiftManageModel({

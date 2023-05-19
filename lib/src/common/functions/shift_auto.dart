@@ -41,7 +41,10 @@ class ShiftHelper {
     globals.saveControlShifts = [];
 
     List<Worker> workers = [];
-    List<WorkPlan> plans = List.filled(WEEK_COUNT, WorkPlan.newInstance());
+    List<WorkPlan> plans = [];
+    for (int i = 0; i < WEEK_COUNT; i++) {
+      plans.add(WorkPlan.newInstance());
+    }
 
     List<StaffListModel> staffs =
         await ClStaff().loadStaffs(context, {'organ_id': organId});
@@ -68,11 +71,11 @@ class ShiftHelper {
 
         w.setShift(tempShift);
       }
-      plans[data.fromTime.weekday - 1] =
-          WorkPlan(data.fromTime, data.toTime, data.count);
+      plans[data.fromTime.weekday - 1]
+          .appendPlan(data.fromTime, data.toTime, data.count);
     }
 
-    List<WorkTime> workTimes = WorkControl.AssignWorkTime(
+    List<WorkTime> workTimes = WorkControl.assignWorkTime(
         workers, plans, organId, DateTime.parse(fromTime));
     globals.saveShiftFromAutoControl = [];
     for (WorkTime wt in workTimes) {
@@ -104,14 +107,14 @@ class ShiftHelper {
     // }
   }
 
-  void autoSetSave(staffId, fromTime, toTime, type) {
-    globals.saveControlShifts.add({
-      'staff_id': staffId,
-      'from_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(fromTime),
-      'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(toTime),
-      'shift_type': type
-    });
-  }
+  // void autoSetSave(staffId, fromTime, toTime, type) {
+  //   globals.saveControlShifts.add({
+  //     'staff_id': staffId,
+  //     'from_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(fromTime),
+  //     'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(toTime),
+  //     'shift_type': type
+  //   });
+  // }
 
   String? getResponseShiftStatus(String curStatus, String convertType) {
     switch (curStatus) {

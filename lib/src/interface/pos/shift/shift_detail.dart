@@ -14,7 +14,6 @@ import 'package:staff_pos_app/src/common/globals.dart' as globals;
 import 'package:staff_pos_app/src/model/order_model.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
 import 'package:staff_pos_app/src/model/stafflistmodel.dart';
-import 'package:syncfusion_flutter_datepicker/datepicker.dart';
 import 'dlg_shift_time_edit.dart';
 
 class ShiftDetail extends StatefulWidget {
@@ -56,10 +55,16 @@ class _ShiftDetail extends State<ShiftDetail> {
 
   Future<List> loadInitData() async {
     staffs = await ClStaff().loadStaffs(context, {'organ_id': widget.organId});
+
+    DateTime from = DateTime.parse(fromDate);
+    DateTime to = DateTime.parse(toDate);
+    from = DateTime(from.year, from.month, from.day, 0, 0, 0);
+    to = DateTime(to.year, to.month, to.day, 23, 59, 59);
+
     shifts = await ClShift().loadShifts(context, {
       'organ_id': widget.organId,
-      'in_from_time': fromDate,
-      'in_to_time': toDate
+      'in_from_time': from.toString(),
+      'in_to_time': to.toString()
     });
 
     // shift update: from auto control shift
@@ -108,8 +113,10 @@ class _ShiftDetail extends State<ShiftDetail> {
         data['from_time'] = DateFormat('HH:mm').format(tempShift.fromTime);
         data['to_time'] = DateFormat('HH:mm').format(tempShift.toTime);
         data['shift_type'] = tempShift.shiftType;
-        data['limit_from_time'] = DateFormat('HH:mm').format(widget.from);
-        data['limit_to_time'] = DateFormat('HH:mm').format(widget.to);
+        // data['limit_from_time'] = DateFormat('HH:mm').format(widget.from);
+        // data['limit_to_time'] = DateFormat('HH:mm').format(widget.to);
+        data['unique_id'] = tempShift.uniqueId;
+        data['organ_id'] = tempShift.organId;
       }
       var searchReserves =
           orders.where((element) => element.staffId == sta.staffId);
@@ -125,43 +132,45 @@ class _ShiftDetail extends State<ShiftDetail> {
     detailData.sort((m1, m2) {
       int ss = -((m1['staff_shift'] ?? 0).compareTo(m2['staff_shift'] ?? 0));
       if (ss == 0) {
-        List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
-        var st1 = m1['shift_type'];
-        var st2 = m2['shift_type'];
-        if (st1 == null) {
-          if (st2 == null) {
-            return m1['staff_id'].compareTo(m2['staff_id']);
-          } else {
-            if (reqs.contains(st2)) {
-              return 1;
-            } else {
-              return -1;
-            }
-          }
-        } else {
-          if (st2 == null) {
-            if (reqs.contains(st1)) {
-              return -1;
-            } else {
-              return 1;
-            }
-          } else {
-            if (st1.compareTo(st2) != 0) {
-              int aa, bb;
-              aa = reqs.indexOf(st1);
-              bb = reqs.indexOf(st2);
-              return aa == bb
-                  ? 0
-                  : aa < bb
-                      ? -1
-                      : 1;
-            }
-            if (m1['from_time'] != null && m2['from_time'] != null) {
-              return m1['from_time'].compareTo(m2['from_time']);
-            }
-            return m1['staff_id'].compareTo(m2['staff_id']);
-          }
-        }
+        return m1['staff_id'].compareTo(m2['staff_id']);
+
+        // List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
+        // var st1 = m1['shift_type'];
+        // var st2 = m2['shift_type'];
+        // if (st1 == null) {
+        //   if (st2 == null) {
+        //     return m1['staff_id'].compareTo(m2['staff_id']);
+        //   } else {
+        //     if (reqs.contains(st2)) {
+        //       return 1;
+        //     } else {
+        //       return -1;
+        //     }
+        //   }
+        // } else {
+        //   if (st2 == null) {
+        //     if (reqs.contains(st1)) {
+        //       return -1;
+        //     } else {
+        //       return 1;
+        //     }
+        //   } else {
+        //     if (st1.compareTo(st2) != 0) {
+        //       int aa, bb;
+        //       aa = reqs.indexOf(st1);
+        //       bb = reqs.indexOf(st2);
+        //       return aa == bb
+        //           ? 0
+        //           : aa < bb
+        //               ? -1
+        //               : 1;
+        //     }
+        //     if (m1['from_time'] != null && m2['from_time'] != null) {
+        //       return m1['from_time'].compareTo(m2['from_time']);
+        //     }
+        //     return m1['staff_id'].compareTo(m2['staff_id']);
+        //   }
+        // }
       } else {
         return ss;
       }
@@ -176,12 +185,16 @@ class _ShiftDetail extends State<ShiftDetail> {
         context: context,
         builder: (BuildContext context) {
           return DlgShiftTimeEdit(
+            staffId: e['staff_id'],
+            organId: e['organ_id'],
+            shiftType: e['shift_type'],
             shiftId: e['shift_id'],
             selectDate: e['date'],
             fromTime: e['from_time'],
             toTime: e['to_time'],
-            limitFromTime: e['limit_from_time'],
-            limitToTime: e['limit_to_time'],
+            uniqueId: e['unique_id'],
+            // limitFromTime: e['limit_from_time'],
+            // limitToTime: e['limit_to_time'],
           );
         }).then((_) => loadInitData());
   }

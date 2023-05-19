@@ -144,13 +144,15 @@ class _ShiftMake extends State<ShiftMake> {
     Navigator.pop(context);
   }
 
-  void onTapPushManage() {
+  void onTapPushManage() async {
     if (selOrganId == null) return;
-    Navigator.push(context, MaterialPageRoute(builder: (_) {
+    await Navigator.push(context, MaterialPageRoute(builder: (_) {
       return ShiftManage(
           initOrgan: selOrganId!,
           initDate: DateTime.parse('$showFromDate 00:00:00'));
     }));
+    globals.saveControlShifts = [];
+    globals.saveShiftFromAutoControl = [];
   }
 
   void onTapPushSetting() {

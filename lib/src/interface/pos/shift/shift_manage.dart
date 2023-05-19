@@ -67,12 +67,62 @@ class _ShiftManage extends State<ShiftManage> {
   }
 
   Future<List> loadInitData() async {
-    globals.saveControlShifts = [];
+    // globals.saveControlShifts = [];
     organList = await ClOrgan().loadOrganList(context, '', globals.staffId);
     selOrganId ??= organList.first.organId;
 
     datas = await ClShift().loadShiftManage(
         context, selOrganId, '$showFromDate 00:00:00', '$showToDate 23:59:59');
+
+    List<ShiftModel> shifts = await ClShift().loadShifts(context, {
+      'organ_id': selOrganId,
+    });
+
+    for (int i = 0; i < datas.length; i++) {
+      ShiftManageModel m = datas[i];
+      m.shifts.clear();
+      m.apply = 0;
+      m.shift = 0;
+
+      for (var s in globals.saveShiftFromAutoControl) {
+        if (s.shiftType == constShiftApply ||
+            s.shiftType == constShiftMeApply) {
+          if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
+                  s.toTime.compareTo(m.toTime) >= 0) ||
+              (s.fromTime.compareTo(m.fromTime) >= 0 &&
+                  s.toTime.compareTo(m.toTime) <= 0)) {
+            m.apply++;
+          }
+        }
+      }
+
+      for (int j = 0; j < shifts.length; j++) {
+        ShiftModel s = shifts[j];
+        // Check is in shiftFromAuto?
+        bool bCheck = false;
+        for (var k in globals.saveShiftFromAutoControl) {
+          if (s.staffId == k.staffId && s.fromTime.day == k.fromTime.day) {
+            bCheck = true;
+            break;
+          }
+        }
+        if (bCheck) {
+          continue;
+        }
+
+        if ((s.shiftType == constShiftApply ||
+                s.shiftType == constShiftMeApply) &&
+            s.fromTime.compareTo(s.toTime) < 0) {
+          if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
+                  s.toTime.compareTo(m.toTime) >= 0) ||
+              (s.fromTime.compareTo(m.fromTime) >= 0 &&
+                  s.toTime.compareTo(m.toTime) <= 0)) {
+            m.apply++;
+          }
+        }
+      }
+    }
+
     appointments = FuncShifts().getAppoinsFromManageList(datas);
 
     var minMaxHour = await ClOrgan().loadOrganShiftMinMaxHour(
@@ -101,8 +151,9 @@ class _ShiftManage extends State<ShiftManage> {
   }
 
   void loadChangeData() {
-    appointments = FuncShifts().getAppoinsFromManageList(datas);
-    setState(() {});
+    // appointments = FuncShifts().getAppoinsFromManageList(datas);
+    refreshLoad();
+    // setState(() {});
   }
 
   void onChangeOrgan(String organId) {
@@ -137,7 +188,7 @@ class _ShiftManage extends State<ShiftManage> {
       }
     }
 
-    if (isSave1 && isSave2) {
+    if (isSave1 || isSave2) {
       refreshLoad();
       setState(() {});
     }
