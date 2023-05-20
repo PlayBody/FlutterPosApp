@@ -42,7 +42,7 @@ class MyDrawer extends StatelessWidget {
                 text: 'チケット管理',
                 onTap: () =>
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
-                      return TicketList();
+                      return const TicketList();
                     }))),
           if (globals.auth >= constAuthOwner)
             createDrawerBodyItem(

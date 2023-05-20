@@ -35,7 +35,8 @@ import 'package:staff_pos_app/src/common/globals.dart' as globals;
 class TicketEdit extends StatefulWidget {
   final String? id;
   final String companyId;
-  const TicketEdit({this.id, required this.companyId, Key? key}) : super(key: key);
+  const TicketEdit({this.id, required this.companyId, Key? key})
+      : super(key: key);
 
   @override
   _TicketEdit createState() => _TicketEdit();
@@ -86,7 +87,6 @@ class _TicketEdit extends State<TicketEdit> {
   }
 
   Future<List> loadTicketData() async {
-
     ticketMaster = await ClTicket().loadMasterTicket(context, widget.companyId);
 
     if (widget.id == null) {
@@ -94,6 +94,13 @@ class _TicketEdit extends State<TicketEdit> {
     }
 
     ticket = await ClTicket().loadTicket(context, widget.id);
+    if (ticket != null) {
+      BuildContext cx = context;
+      List<TicketMasterModel> ts =
+          await ClTicket().loadMasterTicketById(cx, ticket!.ticketId);
+      ticketMaster.addAll(ts);
+    }
+
     if (ticket != null) {
       txtTitleController.text = ticket!.title;
       txtDetailController.text = ticket!.detail;
@@ -107,7 +114,7 @@ class _TicketEdit extends State<TicketEdit> {
       periodMonth = ticket!.periodMonth;
 
       ticketMasterId = ticket!.ticketId;
-    }else {
+    } else {
       return [];
     }
 
@@ -179,8 +186,11 @@ class _TicketEdit extends State<TicketEdit> {
     }
     bool isSave = await ClTicket().saveTicket(context, {
       'id': widget.id == null ? '' : widget.id,
-      'company_id': widget.companyId == '' ? ticketMaster
-          .firstWhere((element) => element.id == ticketMasterId).companyId : widget.companyId ,
+      'company_id': widget.companyId == ''
+          ? ticketMaster
+              .firstWhere((element) => element.id == ticketMasterId)
+              .companyId
+          : widget.companyId,
       'ticket_id': ticketMasterId,
       'ticket_title': txtTitleController.text,
       'ticket_detail': txtDetailController.text,

@@ -15,7 +15,23 @@ class ClTicket {
 
     List<TicketMasterModel> ticketMaster = [];
     Map<dynamic, dynamic> results = {};
-    await Webservice().loadHttp(context, apiUrl, {'company_id': companyId}).then((v) => {results = v});
+    await Webservice().loadHttp(
+        context, apiUrl, {'company_id': companyId}).then((v) => {results = v});
+
+    for (var item in results['ticket_master']) {
+      ticketMaster.add(TicketMasterModel.fromJson(item));
+    }
+
+    return ticketMaster;
+  }
+
+  Future<List<TicketMasterModel>> loadMasterTicketById(context, id) async {
+    String apiUrl = '$apiBase/apitickets/loadMasterTicket';
+
+    List<TicketMasterModel> ticketMaster = [];
+    Map<dynamic, dynamic> results = {};
+    await Webservice()
+        .loadHttp(context, apiUrl, {'id': id}).then((v) => {results = v});
 
     for (var item in results['ticket_master']) {
       ticketMaster.add(TicketMasterModel.fromJson(item));
@@ -93,7 +109,8 @@ class ClTicket {
     return results['isDelete'];
   }
 
-  Future<List<UserTicketModel>> loadUserTickets(context, userId, companyId) async {
+  Future<List<UserTicketModel>> loadUserTickets(
+      context, userId, companyId) async {
     Map<dynamic, dynamic> results = {};
     String apiUrl = '$apiBase/apitickets/loadUserTickets';
 
