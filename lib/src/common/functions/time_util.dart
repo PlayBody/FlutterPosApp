@@ -5,22 +5,22 @@ import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
 import 'package:staff_pos_app/src/model/stafflistmodel.dart';
 
-const int WEEK_COUNT = 7; // 한주일개수
-const int MINUTE_ON_HOUR = 1441; // 하루의 총 분수+1
-const bool USE_REST_FLAG = true; // 직원이 한주일동안 희망하는 시간을 초과하지 않도록 시간조절
+const int WEEK_COUNT = 7;
+const int MINUTE_ON_HOUR = 1441;
+const bool USE_REST_FLAG = true;
 
 class WorkTime {
-  static const int STATE_BLOCKED = 0; // 리용할수 없음 (휴식, 점외대기)
-  static const int STATE_NORMAL = 1; // 리용가능
-  static const int STATE_EMPTY = 2; // 아무것도 요청한것이 없음
+  static const int STATE_BLOCKED = 0;
+  static const int STATE_NORMAL = 1;
+  static const int STATE_EMPTY = 2;
 
-  int state = STATE_EMPTY; // 상태
-  String id = '-1'; // 식별자
-  int st = 0; // 시작분
-  int en = 0; // 마감분
+  int state = STATE_EMPTY;
+  String id = '-1';
+  int st = 0;
+  int en = 0;
 
-  int ost = 0; // 원래 시작분
-  int oen = 0; // 원래 마감
+  int ost = 0;
+  int oen = 0;
 
   dynamic meta;
 
@@ -224,80 +224,45 @@ class WorkControl {
     return _counter;
   }
 
-  static List<WorkTime> assignWorkTime(
-      List<Worker> workers /** 직원들 */,
-      List<WorkPlan> plans /** 계획들 7일 */,
-      String organId,
-      DateTime weekFirstDay) {
-    // i: 항상 직원을 지적하는 첨수로만 리용한다.
-    // j: 항상 요일을 지적하는 첨수로만 리용한다.
-    // k: 항상 분을 지적하는 첨수로만 리용한다.
+  static List<WorkTime> assignWorkTime(List<Worker> workers,
+      List<WorkPlan> plans, String organId, DateTime weekFirstDay) {
     int i, j, k;
-    // 모든 직원들을 주당 작업희망하는 시간순서대로 정렬한다.
     workers.sort((a, b) => -a.hopeMinuteOnWeek.compareTo(b.hopeMinuteOnWeek));
 
-    // 첫번째 코드부분...
-    // 이 부분에서는 모든 직원들을 상점이 바라는 시간표에 맞추어 가능한껏 넣어준다.
-    // 직원들이 요구하는 시간이 상점에서 요구하는 시간보다 더 긴 경우 잘라버리는 조작이 들어간다.
-    // 즉 이 부분을 통과하면 모든 직원들은 자기가 바라는 시간구역안에서 같거나 작은 시간구역으로 이전된다.
-    // 특수경우의 직원에 대해서는 계산을 무시한다. (휴식, 부재, 미등록)
-
     int workerCount = workers.length;
-    // i: 직원첨수, 직원들을 차례로 순환한다.
     for (i = 0; i < workerCount; i++) {
-      // worker: 선택된 개별적인 직원
       Worker worker = workers[i];
-      // j: 요일을 의미한다.
       for (j = 0; j < WEEK_COUNT; j++) {
-        // j번째 요일의 출근계획
         WorkPlan plan = plans[j];
-        // // 그 요일에 상점에서 사람을 요구하지 않으면 자동무시
         if (plans[j].isNull()) {
           continue;
         }
-        // t: 직원의 j 요일에 대한 작업시간 관계를 나타내는 변수
         WorkTime t = worker.times[j];
-        // 만일 j 요일에 직원이 휴식, 부재이거나 일하겠다는 요청이 없으면 다음번 순환으로 넘긴다.
         if (!t.isNormal()) {
           continue;
         }
-        // st: j번째 요일에 t가 바라는 작업시작시간.
-        // en: j번째 요일에 t가 바라는 작업마감시간.
         int st = t.st;
         int en = t.en;
-        // tst: 림시 적합한 시간선의 시작
-        // ten: 림시 적합한 시간선의 마감
         int tst = t.st;
         int ten = t.st;
-        // nst: 가장 적합한 시간선의 시작
-        // nen: 가장 적합한 시간선의 마감
         int nst = 0;
         int nen = 0;
-        // k: 작업예상시간
         for (k = st; k < en; k++) {
-          // 현재의 계획된 시간에 인원이 모자라는가를 검사
           if (plan.req[k] > plan.now[k]) {
-            // 모자라면 직원이 바라는 림시작업마감시간을 늘구어준다
             ten = k + 1;
           } else {
-            // 이미 직원이 다 찼을 경우 현재 시간선의 보관여부를 따진다.
             if (nen - nst < ten - tst) {
-              // 현재 상태가 좋으면 림시보관한다.
               nst = tst;
               nen = ten;
             }
-            // 다음번에 더 좋은 시간선이 나올수 있으므로 그것을 찾기위해 림시변수를 갱신한다.
             tst = k + 1;
             ten = k + 1;
           }
         }
-        // 마지막으로 한번 더 시간선의 보관여부를 따져본다.
         if (nen - nst < ten - tst) {
-          // 현재 상태가 좋으면 림시보관한다.
           nst = tst;
           nen = ten;
         }
-        // 현재의 시간선을 등록한다.
         t.st = nst;
         t.en = nen;
         for (k = nst; k < nen; k++) {
@@ -305,37 +270,23 @@ class WorkControl {
         }
       }
     }
-    // 웃부분 코드를 통하여 모든 직원들은 자기가 바라는 시간구역에 놓이게 되였다.
-
-    // 두번째 코드부분...
-    // 이 부분에서는 상점의 립장에서 상점이 요구하는 시간에 무조건 직원이 있어야 한다는것을 고려한다.
-    // 상점이 요구하는 시간에 충분한 직원들이 없는 경우 더 늘구어주는 조작이 들어간다.
-    // 특수경우의 직원에 대해서는 계산을 무시한다. (휴식, 부재, 미등록)
 
     for (i = 0; i < workerCount; i++) {
       Worker worker = workers[i];
-      // 직원이 한주 일하고싶은 총 시간에서 현재까지 등록된 시간을 던 나머지 유용한 시간을 얻는다.
       int rest = worker.getRestMinute();
       for (j = 0; j < WEEK_COUNT; j++) {
-        // j번째 요일의 출근계획
         WorkPlan plan = plans[j];
-        // 그 요일에 상점에서 사람을 요구하지 않으면 자동무시
         if (plans[j].isNull()) {
           continue;
         }
-        // t: 직원의 j 요일에 대한 작업시간 관계를 나타내는 변수
         WorkTime t = worker.times[j];
-        // 만일 j 요일에 직원이 휴식, 부재이거나 일하겠다는 요청이 없으면 다음번 순환으로 넘긴다.
         if (!t.isNormal()) {
           continue;
         }
-        // 직원이 일할 여유시간이 모자라면 그만둔다.
         if (USE_REST_FLAG && rest <= 0) {
           continue;
         }
-        // 직원의 현재 시간선시작점을 앞쪽으로 최대로 늘군다.
         for (k = t.st - 1; k >= plan.st; k--) {
-          // 앞쪽이 막혔으면 그만두고 그렇지 않으면 늘군다.
           if (plan.req[k] <= plan.now[k]) {
             break;
           } else {
@@ -347,13 +298,10 @@ class WorkControl {
             }
           }
         }
-        // 직원이 일할 여유시간이 모자라면 그만둔다.
         if (USE_REST_FLAG && rest <= 0) {
           continue;
         }
-        // 이번에는 뒤쪽으로 최대로 늘구어본다.
         for (k = t.en; k < plan.en; k++) {
-          // 뒤쪽 막혔으면 그만두고 그렇지 않으면 늘군다.
           if (plan.req[k] <= plan.now[k]) {
             break;
           } else {
@@ -368,35 +316,24 @@ class WorkControl {
       }
     }
 
-    // 세번째 코드부분...
-    // 두번째 부분을 통과한 후에도 여전히 상점의 요구를 만족시키지 못하는것을 고려하여 미등록한 직원들도 일할것을 요구한다.
-    // 여기서는 오직 미등록한 직원들만 가지고 시간선을 만들어준다.
     for (i = 0; i < workerCount; i++) {
       Worker worker = workers[i];
-      // 직원이 한주 일하고싶은 총 시간에서 현재까지 등록된 시간을 던 나머지 유용한 시간을 얻는다.
       int rest = worker.getRestMinute();
       for (j = 0; j < WEEK_COUNT; j++) {
-        // t: 직원의 j 요일에 대한 작업시간 관계를 나타내는 변수
         WorkTime t = worker.times[j];
-        // 직원이 등록가능한 상태인가를 따져본다.
         if (!t.isEmpty()) {
           continue;
         }
-        // 직원이 일할 여유시간이 있는가를 검사한다.
         if (USE_REST_FLAG && rest <= 0) {
           continue;
         }
-        // j번째 요일의 출근계획
         WorkPlan plan = plans[j];
-        // 계획에서 가장 긴 빈 시간선을 얻는다.
         List<int> interval = plan.getMaxInterval();
         int st = interval[0];
         int en = interval[1];
-        // 빈 시간선이 없으면 좋다. 그냥 넘긴다.
         if (st >= en) {
           continue;
         }
-        // 시간을 할당한다.
         t.st = st;
         t.en = en;
         rest -= (t.en - t.st);
