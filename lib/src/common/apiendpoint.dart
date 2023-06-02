@@ -1,5 +1,5 @@
-String apiBase = 'https://www.visit-pos.com/cloud_devotion';
-// String apiBase = 'http://65.109.96.229:82';
+//String apiBase = 'https://www.visit-pos.com/cloud_devotion';
+String apiBase = 'http://65.109.96.229:82';
 
 String apiMaster = '$apiBase/apis/master';
 

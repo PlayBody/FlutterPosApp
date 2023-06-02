@@ -7,7 +7,6 @@ class ShiftModel {
   DateTime fromTime;
   DateTime toTime;
   String shiftType;
-
   int uniqueId;
 
   int getDurationByMinute() {

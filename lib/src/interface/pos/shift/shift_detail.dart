@@ -125,52 +125,10 @@ class _ShiftDetail extends State<ShiftDetail> {
       }
       detailData.add(data);
     }
-    // 정렬기준: 신청, 재요청, 강제요청, 자체승인은 우선.
-    // 우선시 시작시간순으로 정렬해서 보여준다.
-    // 빈 사람들은 그다음.
-    // 다음 나머지.
     detailData.sort((m1, m2) {
       int ss = -((m1['staff_shift'] ?? 0).compareTo(m2['staff_shift'] ?? 0));
       if (ss == 0) {
         return m1['staff_id'].compareTo(m2['staff_id']);
-
-        // List<String> reqs = ['1', '5', '7', '9', '10', '2', '3', '4', '6'];
-        // var st1 = m1['shift_type'];
-        // var st2 = m2['shift_type'];
-        // if (st1 == null) {
-        //   if (st2 == null) {
-        //     return m1['staff_id'].compareTo(m2['staff_id']);
-        //   } else {
-        //     if (reqs.contains(st2)) {
-        //       return 1;
-        //     } else {
-        //       return -1;
-        //     }
-        //   }
-        // } else {
-        //   if (st2 == null) {
-        //     if (reqs.contains(st1)) {
-        //       return -1;
-        //     } else {
-        //       return 1;
-        //     }
-        //   } else {
-        //     if (st1.compareTo(st2) != 0) {
-        //       int aa, bb;
-        //       aa = reqs.indexOf(st1);
-        //       bb = reqs.indexOf(st2);
-        //       return aa == bb
-        //           ? 0
-        //           : aa < bb
-        //               ? -1
-        //               : 1;
-        //     }
-        //     if (m1['from_time'] != null && m2['from_time'] != null) {
-        //       return m1['from_time'].compareTo(m2['from_time']);
-        //     }
-        //     return m1['staff_id'].compareTo(m2['staff_id']);
-        //   }
-        // }
       } else {
         return ss;
       }

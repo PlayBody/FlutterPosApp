@@ -47,7 +47,7 @@ class MyDrawer extends StatelessWidget {
           if (globals.auth >= constAuthOwner)
             createDrawerBodyItem(
                 icon: Icons.card_travel_outlined,
-                text: 'チケット種類管理',
+                text: 'チケット種類管理', // Ticket type manage
                 onTap: () =>
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
                       return Masters();

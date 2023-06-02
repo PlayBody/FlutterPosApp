@@ -98,7 +98,17 @@ class _TicketEdit extends State<TicketEdit> {
       BuildContext cx = context;
       List<TicketMasterModel> ts =
           await ClTicket().loadMasterTicketById(cx, ticket!.ticketId);
-      ticketMaster.addAll(ts);
+      for (TicketMasterModel tm in ts) {
+        int i;
+        for (i = 0; i < ticketMaster.length; i++) {
+          if (ticketMaster[i].id == tm.id) {
+            break;
+          }
+        }
+        if (ticketMaster.length == i) {
+          ticketMaster.add(tm);
+        }
+      }
     }
 
     if (ticket != null) {
@@ -340,7 +350,7 @@ class _TicketEdit extends State<TicketEdit> {
           ),
           SizedBox(height: 8),
           RowLabelInput(
-              label: 'チケット種別名',
+              label: 'チケット種別名', // Ticekt type name
               renderWidget: DropDownModelSelect(
                 value: ticketMasterId,
                 items: [

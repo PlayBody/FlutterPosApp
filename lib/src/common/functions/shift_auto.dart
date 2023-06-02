@@ -85,7 +85,6 @@ class ShiftHelper {
 
     // for (int i = 0; i < datas.length; i++) {
     //   ShiftManageModel data = datas[i];
-    //   //  개수변수를 앞으로 리용해야 한다.: data.count;
     //   models[i] = ShiftManageModel.autoAssignTimes(models[i], data.fromTime,
     //       data.toTime, data.count, staffs, skipModels[i], organId);
 
