@@ -31,8 +31,6 @@ class DlgShiftTimeEdit extends StatefulWidget {
       required this.shiftId,
       required this.selectDate,
       required this.fromTime,
-      // required this.limitFromTime,
-      // required this.limitToTime,
       required this.toTime,
       required this.uniqueId,
       required this.staffId,

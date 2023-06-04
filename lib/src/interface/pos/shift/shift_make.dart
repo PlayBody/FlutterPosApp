@@ -151,8 +151,8 @@ class _ShiftMake extends State<ShiftMake> {
           initOrgan: selOrganId!,
           initDate: DateTime.parse('$showFromDate 00:00:00'));
     }));
-    globals.saveControlShifts = [];
     globals.saveShiftFromAutoControl = [];
+    refreshLoad();
   }
 
   void onTapPushSetting() {
@@ -364,7 +364,11 @@ class _ShiftMake extends State<ShiftMake> {
       )),
       SizedBox(width: 8),
       if (globals.auth > constAuthStaff)
-        WhiteButton(label: 'シフト管理', tapFunc: () => onTapPushManage()),
+        WhiteButton(
+            label: 'シフト管理',
+            tapFunc: () {
+              onTapPushManage();
+            }),
       SizedBox(width: 30)
     ]);
   }

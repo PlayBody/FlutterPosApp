@@ -530,65 +530,65 @@ class ClShift {
     return results['isSave'];
   }
 
-  Future<bool> updateShiftChange(context, organId) async {
-    List<dynamic> shifts = [];
-    for (var item in globals.saveControlShifts) {
-      if (item['shift_type'] == constShiftRequest ||
-          item['shift_type'] == constShiftMeReply) {
-        shifts.add(item);
-        continue;
-      }
-      var temp = shifts.firstWhere(
-          (element) =>
-              element['staff_id'] == item['staff_id'] &&
-              element['shift_type'] == item['shift_type'] &&
-              element['to_time'] == item['from_time'],
-          orElse: () => null);
-      if (temp != null) {
-        int preIndex = shifts.indexOf(temp);
-        shifts[preIndex]['to_time'] = item['to_time'];
+  // Future<bool> updateShiftChange(context, organId) async {
+  //   List<dynamic> shifts = [];
+  //   for (var item in globals.saveControlShifts) {
+  //     if (item['shift_type'] == constShiftRequest ||
+  //         item['shift_type'] == constShiftMeReply) {
+  //       shifts.add(item);
+  //       continue;
+  //     }
+  //     var temp = shifts.firstWhere(
+  //         (element) =>
+  //             element['staff_id'] == item['staff_id'] &&
+  //             element['shift_type'] == item['shift_type'] &&
+  //             element['to_time'] == item['from_time'],
+  //         orElse: () => null);
+  //     if (temp != null) {
+  //       int preIndex = shifts.indexOf(temp);
+  //       shifts[preIndex]['to_time'] = item['to_time'];
 
-        var nextTemp = shifts.firstWhere(
-            (element) =>
-                element['staff_id'] == item['staff_id'] &&
-                element['shift_type'] == item['shift_type'] &&
-                element['from_time'] == item['to_time'],
-            orElse: () => null);
-        if (nextTemp != null) {
-          shifts[preIndex]['to_time'] = nextTemp['to_time'];
-          shifts.remove(nextTemp);
-        }
-        continue;
-      } else {
-        var nextTemp = shifts.firstWhere(
-            (element) =>
-                element['staff_id'] == item['staff_id'] &&
-                element['shift_type'] == item['shift_type'] &&
-                element['from_time'] == item['to_time'],
-            orElse: () => null);
-        if (nextTemp != null) {
-          int nextIndex = shifts.indexOf(nextTemp);
-          shifts[nextIndex]['from_time'] = item['from_time'];
-          continue;
-        }
-      }
-      shifts.add(item);
-    }
+  //       var nextTemp = shifts.firstWhere(
+  //           (element) =>
+  //               element['staff_id'] == item['staff_id'] &&
+  //               element['shift_type'] == item['shift_type'] &&
+  //               element['from_time'] == item['to_time'],
+  //           orElse: () => null);
+  //       if (nextTemp != null) {
+  //         shifts[preIndex]['to_time'] = nextTemp['to_time'];
+  //         shifts.remove(nextTemp);
+  //       }
+  //       continue;
+  //     } else {
+  //       var nextTemp = shifts.firstWhere(
+  //           (element) =>
+  //               element['staff_id'] == item['staff_id'] &&
+  //               element['shift_type'] == item['shift_type'] &&
+  //               element['from_time'] == item['to_time'],
+  //           orElse: () => null);
+  //       if (nextTemp != null) {
+  //         int nextIndex = shifts.indexOf(nextTemp);
+  //         shifts[nextIndex]['from_time'] = item['from_time'];
+  //         continue;
+  //       }
+  //     }
+  //     shifts.add(item);
+  //   }
 
-    var param = {};
-    int i = 0;
-    for (var element in shifts) {
-      param[i.toString()] = element;
-      i++;
-    }
-    await Webservice().loadHttp(context, apiShiftSaveShiftManage, {
-      'organ_id': organId,
-      'sender_id': globals.staffId,
-      'data': jsonEncode(param),
-    });
+  //   var param = {};
+  //   int i = 0;
+  //   for (var element in shifts) {
+  //     param[i.toString()] = element;
+  //     i++;
+  //   }
+  //   await Webservice().loadHttp(context, apiShiftSaveShiftManage, {
+  //     'organ_id': organId,
+  //     'sender_id': globals.staffId,
+  //     'data': jsonEncode(param),
+  //   });
 
-    return true;
-  }
+  //   return true;
+  // }
 
   //save Staff input Shifts
   Future<bool> saveStaffInputShift(context, param) async {

@@ -2,16 +2,14 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:staff_pos_app/src/common/business/orders.dart';
 import 'package:staff_pos_app/src/common/business/shift.dart';
 import 'package:staff_pos_app/src/common/business/staffs.dart';
 import 'package:staff_pos_app/src/common/functions.dart';
-
+import 'package:staff_pos_app/src/common/functions/time_util.dart';
 import 'package:staff_pos_app/src/interface/components/buttons.dart';
 
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/globals.dart' as globals;
-import 'package:staff_pos_app/src/model/order_model.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
 import 'package:staff_pos_app/src/model/stafflistmodel.dart';
 import 'dlg_shift_time_edit.dart';
@@ -38,7 +36,6 @@ class _ShiftDetail extends State<ShiftDetail> {
 
   List<ShiftModel> shifts = [];
   List<StaffListModel> staffs = [];
-  List<OrderModel> orders = [];
 
   List<Map<String, dynamic>> detailData = [];
   String fromDate = '';
@@ -67,13 +64,16 @@ class _ShiftDetail extends State<ShiftDetail> {
       'in_to_time': to.toString()
     });
 
+    shifts.removeWhere(
+        (element) => element.fromTime.compareTo(element.toTime) >= 0);
+
     // shift update: from auto control shift
 
     for (var e in globals.saveShiftFromAutoControl) {
       if (e.fromTime.day != DateTime.parse(fromDate).day) {
         continue;
       } else {
-        if (e.shiftId == '-1') {
+        if (e.shiftId == '-1' || e.shiftId == '') {
           shifts.add(e);
         } else {
           for (int i = 0; i < shifts.length; i++) {
@@ -88,11 +88,11 @@ class _ShiftDetail extends State<ShiftDetail> {
       }
     }
 
-    orders = await ClOrder().loadOrderList(context, {
-      'organ_id': widget.organId,
-      'in_from_time': fromDate,
-      'in_to_time': toDate
-    });
+    // orders = await ClOrder().loadOrderList(context, {
+    //   'organ_id': widget.organId,
+    //   'in_from_time': fromDate,
+    //   'in_to_time': toDate
+    // });
 
     detailData = [];
     for (var sta in staffs) {
@@ -103,26 +103,34 @@ class _ShiftDetail extends State<ShiftDetail> {
       data['staff_id'] = sta.staffId;
       data['auth'] = sta.auth;
       data['staff_shift'] = sta.staffShift;
-      ShiftModel? tempShift =
-          shifts.where((element) => element.staffId == sta.staffId).isNotEmpty
-              ? shifts.where((element) => element.staffId == sta.staffId).first
-              : null;
-      if (tempShift != null) {
-        data['shift_id'] = tempShift.shiftId;
-        data['date'] = DateFormat('yyyy-MM-dd').format(tempShift.fromTime);
-        data['from_time'] = DateFormat('HH:mm').format(tempShift.fromTime);
-        data['to_time'] = DateFormat('HH:mm').format(tempShift.toTime);
-        data['shift_type'] = tempShift.shiftType;
-        // data['limit_from_time'] = DateFormat('HH:mm').format(widget.from);
-        // data['limit_to_time'] = DateFormat('HH:mm').format(widget.to);
-        data['unique_id'] = tempShift.uniqueId;
-        data['organ_id'] = tempShift.organId;
+      List<ShiftModel> tempShiftList = shifts
+              .where((element) => element.staffId == sta.staffId)
+              .isNotEmpty
+          ? shifts.where((element) => element.staffId == sta.staffId).toList()
+          : [];
+      data['shifts'] = [];
+      if (tempShiftList.isNotEmpty) {
+        for (var tempShift in tempShiftList) {
+          var e = {};
+          e['shift_id'] = tempShift.shiftId;
+          e['date'] = DateFormat('yyyy-MM-dd').format(tempShift.fromTime);
+          e['from_time'] = DateFormat('HH:mm').format(tempShift.fromTime);
+          e['to_time'] = DateFormat('HH:mm').format(tempShift.toTime);
+          e['shift_type'] = tempShift.shiftType;
+          e['unique_id'] = tempShift.uniqueId;
+          e['organ_id'] = tempShift.organId;
+          e['staff_id'] = sta.staffId;
+          e['from'] = tempShift.fromTime;
+          e['to'] = tempShift.toTime;
+          e['new_state'] = tempShift.metaType;
+          data['shifts'].add(e);
+        }
       }
-      var searchReserves =
-          orders.where((element) => element.staffId == sta.staffId);
-      if (searchReserves.isNotEmpty) {
-        data['reserve_type'] = searchReserves.first.status;
-      }
+      // var searchReserves =
+      //     orders.where((element) => element.staffId == sta.staffId);
+      // if (searchReserves.isNotEmpty) {
+      //   data['reserve_type'] = searchReserves.first.status;
+      // }
       detailData.add(data);
     }
     detailData.sort((m1, m2) {
@@ -138,7 +146,7 @@ class _ShiftDetail extends State<ShiftDetail> {
     return [];
   }
 
-  Future<void> changeTimeZone(_index, e) async {
+  Future<void> changeTimeZone(e) async {
     showDialog(
         context: context,
         builder: (BuildContext context) {
@@ -151,8 +159,6 @@ class _ShiftDetail extends State<ShiftDetail> {
             fromTime: e['from_time'],
             toTime: e['to_time'],
             uniqueId: e['unique_id'],
-            // limitFromTime: e['limit_from_time'],
-            // limitToTime: e['limit_to_time'],
           );
         }).then((_) => loadInitData());
   }
@@ -239,36 +245,6 @@ class _ShiftDetail extends State<ShiftDetail> {
   }
 
   Widget _getRowContent(e) {
-    var _appointments = constShiftAppoints[e['shift_type']];
-    String _subject = '';
-    var _color = Colors.black;
-    if (_appointments != null) {
-      if (_appointments['subject'] != null)
-        _subject = _appointments['subject']!;
-      if (_appointments['color'] != null)
-        _color = Color(int.parse(_appointments['color']!));
-    }
-    String _shiftType = e['shift_type'] == null ? '' : e['shift_type'];
-    var _search = globals.saveControlShifts.where((element) =>
-        element['staff_id'] == e['staff_id'] &&
-        element['from_time'] == fromDate &&
-        element['to_time'] == toDate);
-    var _saveRow = _search.length > 0 ? _search.first : null;
-
-    String _changeType = '';
-    int? _index;
-    if (_saveRow != null) {
-      _changeType = _saveRow['shift_type'];
-      _index = globals.saveControlShifts.indexOf(_saveRow);
-    }
-
-    String _reserveStatus = '';
-    if (e['reserve_type'] != null && e['reserve_type'] == constReserveRequest)
-      _reserveStatus = '予約申込';
-
-    if (e['reserve_type'] != null && e['reserve_type'] == constReserveApply)
-      _reserveStatus = '予約済み';
-
     return Container(
         decoration: BoxDecoration(
             border: Border(
@@ -282,24 +258,44 @@ class _ShiftDetail extends State<ShiftDetail> {
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               width: MediaQuery.of(context).size.width * 0.3,
               child: Text('${e['staff_name']} (${e['staff_shift']})')),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: e['shifts'].isEmpty
+                ? [_getRowContentOfOneStaff(e)]
+                : [...e['shifts'].map((ee) => _getRowContentOfOneStaff(ee))],
+          )
+        ]));
+  }
+
+  Widget _getRowContentOfOneStaff(e) {
+    var appointments = constShiftAppoints[e['shift_type']];
+    String subject = '';
+    var color = const Color.fromRGBO(0, 0, 0, 1);
+    if (appointments != null) {
+      if (appointments['subject'] != null) {
+        subject = appointments['subject']!;
+      }
+      if (appointments['color'] != null) {
+        color = Color(int.parse(appointments['color']!));
+      }
+    }
+    String shiftType = e['shift_type'] ?? '';
+
+    return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
+        alignment: Alignment.centerLeft,
+        child: Row(children: [
           Container(
               decoration: BoxDecoration(
                   border: Border(
                       right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
               alignment: Alignment.center,
               width: MediaQuery.of(context).size.width * 0.2,
-              child: Text(_subject, style: TextStyle(color: _color))),
-          // Container(
-          //     decoration: BoxDecoration(
-          //         border: Border(
-          //             right: BorderSide(color: Colors.grey.withOpacity(0.3)))),
-          //     alignment: Alignment.center,
-          //     width: 100,
-          //     child: Text(_subject, style: TextStyle(color: _color))),
+              child: Text(subject, style: TextStyle(color: color))),
           GestureDetector(
             onTap: e['from_time'] != null
                 ? () {
-                    changeTimeZone(_index, e);
+                    changeTimeZone(e);
                   }
                 : null,
             child: Container(
@@ -320,63 +316,62 @@ class _ShiftDetail extends State<ShiftDetail> {
             ),
           ),
           const SizedBox(width: 10),
-          if (_shiftType == constShiftSubmit || _shiftType == constShiftReject)
-            _getIconButtonItem(Icons.check, Colors.green, constShiftApply,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeReply ||
-              _shiftType == constShiftMeApply)
-            _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeReply)
-            _getIconButtonItem(Icons.check, Colors.green, constShiftMeApply,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftMeApply)
+          if (shiftType == constShiftSubmit || shiftType == constShiftReject)
+            _getIconButtonItem(Icons.check, Colors.green, constShiftApply, e),
+          if (shiftType == constShiftMeReply || shiftType == constShiftMeApply)
+            _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject, e),
+          if (shiftType == constShiftMeReply)
+            _getIconButtonItem(Icons.check, Colors.green, constShiftMeApply, e),
+          if (shiftType == constShiftMeApply)
             const Icon(Icons.check, color: Colors.orange),
-          if (_shiftType == constShiftSubmit || _shiftType == constShiftApply)
-            _getIconButtonItem(Icons.close, Colors.red, constShiftReject,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftOut ||
-              _shiftType == '' ||
-              _shiftType == constShiftRest)
-            _getIconButtonItem(Icons.send, Colors.blue, constShiftRequest,
-                _changeType, _index, e['staff_id']),
-          if (_shiftType == constShiftRequest)
-            _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject,
-                _changeType, _index, e['staff_id']),
-          // _getIconButtonItem(Icons.cancel, Colors.orange, '0', _changeType,
-          //     _index, e['staff_id']),
+          if (shiftType == constShiftSubmit || shiftType == constShiftApply)
+            _getIconButtonItem(Icons.close, Colors.red, constShiftReject, e),
+          if (shiftType == constShiftOut ||
+              shiftType == '' ||
+              shiftType == constShiftRest)
+            _getIconButtonItem(Icons.send, Colors.blue, constShiftRequest, e),
+          if (shiftType == constShiftRequest)
+            _getIconButtonItem(Icons.close, Colors.red, constShiftMeReject, e),
         ]));
   }
 
-  Widget _getIconButtonItem(icon, color, trueValue, value, index, staffId) =>
-      Container(
+  Widget _getIconButtonItem(icon, color, newState, e) => Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         width: 25,
         child: IconWhiteButton(
           icon: icon,
-          backColor: trueValue == value ? Colors.grey : null,
-          color: trueValue == value ? Colors.white : color,
-          tapFunc: () => onTapAction(trueValue, value, index, staffId),
+          backColor: newState == e['new_state'] ? Colors.grey : null,
+          color: newState == e['new_state'] ? Colors.white : color,
+          tapFunc: () => onTapAction(newState, e),
         ),
       );
 
-  void onTapAction(trueValue, value, index, staffId) {
-    if (trueValue == value && index == null) return;
-    if (index == null) {
-      globals.saveControlShifts.add({
-        'staff_id': staffId,
-        'from_time': fromDate,
-        'to_time': toDate,
-        'shift_type': trueValue
-      });
+  void onTapAction(newState, e) {
+    if (e['unique_id'] == null || e['unique_id'] == -1) {
+      ShiftModel model = ShiftModel(
+          staffId: e['staff_id'],
+          organId: widget.organId,
+          shiftId: e['shift_id'] ?? '',
+          fromTime: e['from'] ?? widget.from,
+          toTime: e['to'] ?? widget.to,
+          shiftType: e['shift_type'] ?? '',
+          uniqueId: WorkControl.getGenCounter());
+      model.metaType = newState;
+      globals.saveShiftFromAutoControl.add(model);
     } else {
-      if (trueValue == value) {
-        globals.saveControlShifts.removeAt(index);
+      int index = globals.saveShiftFromAutoControl
+          .indexWhere((element) => element.uniqueId == e['unique_id']);
+      if (e['new_state'] != null && e['new_state'] == newState) {
+        if (globals.saveShiftFromAutoControl[index].shiftType == '') {
+          globals.saveShiftFromAutoControl.removeAt(index);
+        } else {
+          globals.saveShiftFromAutoControl[index].metaType = null;
+        }
       } else {
-        globals.saveControlShifts.elementAt(index)['shift_type'] = trueValue;
+        globals.saveShiftFromAutoControl[index].metaType = newState;
       }
     }
-    print(globals.saveControlShifts);
+    loadInitData();
     setState(() {});
   }
 }

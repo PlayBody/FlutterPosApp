@@ -67,7 +67,6 @@ class _ShiftManage extends State<ShiftManage> {
   }
 
   Future<List> loadInitData() async {
-    // globals.saveControlShifts = [];
     organList = await ClOrgan().loadOrganList(context, '', globals.staffId);
     selOrganId ??= organList.first.organId;
 
@@ -162,33 +161,26 @@ class _ShiftManage extends State<ShiftManage> {
   }
 
   Future<void> onTapSave() async {
-    bool isSave1 = false;
-    bool isSave2 = false;
+    bool isSave = false;
 
     Dialogs().loaderDialogNormal(context);
-    if (globals.saveControlShifts.isNotEmpty) {
-      isSave1 = await ClShift().updateShiftChange(context, selOrganId);
-      if (isSave1) {
-        globals.saveControlShifts = [];
-      }
-    }
     if (globals.saveShiftFromAutoControl.isNotEmpty) {
       for (ShiftModel element in globals.saveShiftFromAutoControl) {
-        isSave2 = await ClShift().forceSaveShift(
+        isSave = await ClShift().forceSaveShift(
             context,
             element.staffId,
             element.organId,
             element.shiftId,
             element.fromTime.toString(),
             element.toTime.toString(),
-            element.shiftType);
+            element.metaType ?? element.shiftType);
       }
-      if (isSave2) {
+      if (isSave) {
         globals.saveShiftFromAutoControl = [];
       }
     }
 
-    if (isSave1 || isSave2) {
+    if (isSave) {
       refreshLoad();
       setState(() {});
     }
@@ -405,17 +397,20 @@ class _ShiftManage extends State<ShiftManage> {
     return RowButtonGroup(widgets: [
       PrimaryButton(
           label: '保存',
-          tapFunc: (globals.saveControlShifts.isNotEmpty ||
-                  globals.saveShiftFromAutoControl.isNotEmpty)
+          tapFunc: globals.saveShiftFromAutoControl.isNotEmpty
               ? () => onTapSave()
               : null),
       const SizedBox(width: 8),
       PrimaryButton(label: '自動調整', tapFunc: () => onTapAuto()),
-      // globals.saveControlShifts.isEmpty ? () => onTapAuto() : null),
       const SizedBox(width: 8),
       CancelButton(
           label: '戻る',
-          tapFunc: () {
+          tapFunc: () async {
+            if (globals.saveShiftFromAutoControl.isNotEmpty) {
+              bool conf = await Dialogs()
+                  .confirmDialog(context, '変更されたシフト内容は無視されます。\nそれでも大丈夫ですか?');
+              if (!conf) return;
+            }
             globals.saveShiftFromAutoControl = [];
             Navigator.pop(context);
           }),

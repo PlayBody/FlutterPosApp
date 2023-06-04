@@ -38,8 +38,6 @@ class ShiftHelper {
     var datas =
         await ClShift().loadShiftManagePsg(context, organId, fromTime, toTime);
 
-    globals.saveControlShifts = [];
-
     List<Worker> workers = [];
     List<WorkPlan> plans = [];
     for (int i = 0; i < WEEK_COUNT; i++) {
@@ -53,67 +51,42 @@ class ShiftHelper {
       workers.add(Worker.fromStaffList(sta));
     }
 
-    List<List<ShiftModel>> models = [];
-    List<List<ShiftModel>> skipModels = [];
+    globals.saveShiftFromAutoControl = [];
     for (ShiftManageModel data in datas) {
-      List<ShiftModel> shifts = await ClShift().loadShifts(context, {
-        'organ_id': organId,
-        'in_from_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(data.fromTime),
-        'in_to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(data.toTime)
-      });
-
-      for (Worker w in workers) {
-        ShiftModel? tempShift = shifts
-                .where((element) => element.staffId == w.meta.staffId)
-                .isNotEmpty
-            ? shifts.where((element) => element.staffId == w.meta.staffId).first
-            : null;
-
-        w.setShift(tempShift);
-      }
       plans[data.fromTime.weekday - 1]
           .appendPlan(data.fromTime, data.toTime, data.count);
     }
 
+    List<ShiftModel> shifts = await ClShift().loadShifts(context,
+        {'organ_id': organId, 'in_from_time': fromTime, 'in_to_time': toTime});
+
+    for (Worker w in workers) {
+      List<ShiftModel> ws =
+          shifts.where((element) => element.staffId == w.meta.staffId).toList();
+      var signs = List<bool>.generate(8, (index) => false);
+
+      for (ShiftModel wws in ws) {
+        if (constShiftAutoUsingList.contains(wws.shiftType) &&
+            signs[wws.fromTime.weekday] == false) {
+          w.setShift(wws);
+          signs[wws.fromTime.weekday] = true;
+        } else {
+          if (constShiftAutoUsingList.contains(wws.shiftType)) {
+            wws.shiftType = constShiftReject;
+            wws.uniqueId = WorkControl.getGenCounter();
+            globals.saveShiftFromAutoControl.add(wws);
+          }
+        }
+      }
+    }
+
     List<WorkTime> workTimes = WorkControl.assignWorkTime(
         workers, plans, organId, DateTime.parse(fromTime));
-    globals.saveShiftFromAutoControl = [];
     for (WorkTime wt in workTimes) {
       globals.saveShiftFromAutoControl.add(ShiftModel.fromWorkTime(wt));
     }
     return true;
-
-    // for (int i = 0; i < datas.length; i++) {
-    //   ShiftManageModel data = datas[i];
-    //   models[i] = ShiftManageModel.autoAssignTimes(models[i], data.fromTime,
-    //       data.toTime, data.count, staffs, skipModels[i], organId);
-
-    //   for (ShiftModel element in models[i]) {
-    //     globals.saveShiftFromAutoControl.add(element);
-    //     // await ClShift().forceSaveShift(
-    //     //     context,
-    //     //     element.staffId,
-    //     //     element.organId,
-    //     //     element.shiftId,
-    //     //     element.fromTime.toString(),
-    //     //     element.toTime.toString(),
-    //     //     element.shiftType);
-    //     // await ClShift().updateShiftTime(context, element.shiftId,
-    //     //     element.fromTime.toString(), element.toTime.toString());
-    //     // await ClShift()
-    //     //     .updateShiftStatus(context, element.shiftId, element.shiftType);
-    //   }
-    // }
   }
-
-  // void autoSetSave(staffId, fromTime, toTime, type) {
-  //   globals.saveControlShifts.add({
-  //     'staff_id': staffId,
-  //     'from_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(fromTime),
-  //     'to_time': DateFormat('yyyy-MM-dd HH:mm:ss').format(toTime),
-  //     'shift_type': type
-  //   });
-  // }
 
   String? getResponseShiftStatus(String curStatus, String convertType) {
     switch (curStatus) {

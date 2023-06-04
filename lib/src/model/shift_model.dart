@@ -9,6 +9,8 @@ class ShiftModel {
   String shiftType;
   int uniqueId;
 
+  String? metaType;
+
   int getDurationByMinute() {
     return toTime.difference(fromTime).inMinutes;
   }

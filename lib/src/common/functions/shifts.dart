@@ -122,53 +122,9 @@ class FuncShifts {
     List<Appointment> appointments = [];
 
     for (var data in datas) {
-      //   int cnt = 0;
-      //   int colorCnt = 0;
-      //   for (var shift in data.shifts) {
-      //     var search = globals.saveControlShifts.where((element) =>
-      //         element['staff_id'] == shift.staffId &&
-      //         element['from_time'] ==
-      //             DateFormat('yyyy-MM-dd HH:mm:ss').format(data.fromTime) &&
-      //         element['to_time'] ==
-      //             DateFormat('yyyy-MM-dd HH:mm:ss').format(data.toTime));
-      //     String type = shift.shiftType;
-      //     if (search.isNotEmpty) type = search.first['shift_type'];
-      //     if (type == constShiftApply || type == constShiftMeApply) colorCnt++;
-      //     if (type == constShiftApply ||
-      //         type == constShiftMeApply ||
-      //         type == constShiftMeReply ||
-      //         type == constShiftRequest) cnt++;
-      //   }
-
-      //   var globalData = globals.saveControlShifts.where((element) =>
-      //       element['from_time'] ==
-      //           DateFormat('yyyy-MM-dd HH:mm:ss').format(data.fromTime) &&
-      //       element['to_time'] ==
-      //           DateFormat('yyyy-MM-dd HH:mm:ss').format(data.toTime));
-      //   for (var element in globalData) {
-      //     if (data.shifts
-      //         .where((shift) => shift.staffId == element['staff_id'])
-      //         .isEmpty) {
-      //       String type = element['shift_type'];
-      //       if (type == constShiftApply || type == constShiftMeApply) {
-      //         colorCnt++;
-      //       }
-      //       if (type == constShiftApply ||
-      //           type == constShiftMeApply ||
-      //           type == constShiftMeReply ||
-      //           type == constShiftRequest) cnt++;
-      //     }
-      //   }
-
       appointments.add(Appointment(
         startTime: data.fromTime,
         endTime: data.toTime,
-        // subject: '$cnt/${data.count}',
-        // color: data.count == colorCnt
-        //     ? Colors.blue.withOpacity(0.8)
-        //     : (data.count == cnt
-        //         ? Colors.green.withOpacity(0.8)
-        //         : Colors.yellow.withOpacity(0.8)),
         subject: '${data.apply}/${data.count}',
         color: data.count <= data.apply
             ? Colors.green.withOpacity(0.8)
