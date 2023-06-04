@@ -22,6 +22,8 @@ class WorkTime {
   int ost = 0;
   int oen = 0;
 
+  bool? isRequest;
+
   dynamic meta;
 
   WorkTime() {
@@ -37,6 +39,9 @@ class WorkTime {
     WorkTime w = WorkTime();
     if (constShiftAutoUsingList.contains(shift.shiftType)) {
       w.state = STATE_NORMAL;
+      if (shift.shiftType == constShiftRequest) {
+        w.isRequest = true;
+      }
     } else {
       w.state = STATE_BLOCKED;
     }
@@ -81,6 +86,9 @@ class WorkTime {
 
   bool isChanged() {
     if (st < ost || en > oen) {
+      return true;
+    }
+    if (isRequest ?? false) {
       return true;
     }
     return false;

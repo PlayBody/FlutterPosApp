@@ -34,9 +34,15 @@ class Webservice {
         if (response.statusCode == 200) {
           return jsonDecode(response.body);
         } else {
+          if (constIsTestApi == 1) {
+            print('\t\tRes: $errServerString');
+          }
           conf = await Dialogs().retryOrExit(context, errServerString);
         }
       } catch (e) {
+        if (constIsTestApi == 1) {
+          print('\t\tRes: $errNetworkString');
+        }
         conf = await Dialogs().retryOrExit(context, errNetworkString);
       }
     } while (conf);
@@ -66,6 +72,9 @@ class Webservice {
           conf = await Dialogs().retryOrExit(currentContext!, errServerString);
         }
       } catch (e) {
+        if (constIsTestApi == 1) {
+          print('\t\tRes: $errNetworkString');
+        }
         conf = await Dialogs().retryOrExit(currentContext!, errNetworkString);
       }
     } while (conf);
