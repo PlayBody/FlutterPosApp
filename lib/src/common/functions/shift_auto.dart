@@ -71,9 +71,13 @@ class ShiftHelper {
           w.setShift(wws);
           signs[wws.fromTime.weekday] = true;
         } else {
-          if (constShiftAutoUsingList.contains(wws.shiftType)) {
+          if (wws.shiftType == constShiftOut ||
+              wws.shiftType == constShiftRest) {
+            w.setBlockShift(wws);
+          } else if (constShiftAutoUsingList.contains(wws.shiftType)) {
             wws.shiftType = constShiftReject;
             wws.uniqueId = WorkControl.getGenCounter();
+            wws.deleted = 1;
             globals.saveShiftFromAutoControl.add(wws);
           }
         }

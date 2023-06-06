@@ -173,7 +173,8 @@ class _ShiftManage extends State<ShiftManage> {
             element.shiftId,
             element.fromTime.toString(),
             element.toTime.toString(),
-            element.metaType ?? element.shiftType);
+            element.metaType ?? element.shiftType,
+            "${element.deleted ?? 0}");
       }
       if (isSave) {
         globals.saveShiftFromAutoControl = [];

@@ -21,6 +21,7 @@ class WorkTime {
 
   int ost = 0;
   int oen = 0;
+  List<bool> sign = List<bool>.generate(MINUTE_ON_HOUR, (index) => false);
 
   bool? isRequest;
 
@@ -35,22 +36,21 @@ class WorkTime {
     oen = 0;
   }
 
-  factory WorkTime.fromShift(ShiftModel shift) {
-    WorkTime w = WorkTime();
+  void addShift(ShiftModel shift) {
     if (constShiftAutoUsingList.contains(shift.shiftType)) {
-      w.state = STATE_NORMAL;
+      state = STATE_NORMAL;
       if (shift.shiftType == constShiftRequest) {
-        w.isRequest = true;
+        isRequest = true;
       }
     } else {
-      w.state = STATE_BLOCKED;
+      state = STATE_BLOCKED;
     }
-    w.id = shift.shiftId;
-    w.st = shift.fromTime.hour * 60 + shift.fromTime.minute;
-    w.en = shift.toTime.hour * 60 + shift.toTime.minute;
-    w.ost = w.st;
-    w.oen = w.en;
-    return w;
+
+    id = shift.shiftId;
+    st = shift.fromTime.hour * 60 + shift.fromTime.minute;
+    en = shift.toTime.hour * 60 + shift.toTime.minute;
+    ost = st;
+    oen = en;
   }
 
   factory WorkTime.fromAutoCalc(String organId, WorkTime other,
@@ -128,6 +128,17 @@ class WorkTime {
     }
     return en - st;
   }
+
+  void setBlockInterval(DateTime from, DateTime to) {
+    int a = from.hour * 60 + from.minute;
+    int b = to.hour * 60 + to.minute;
+    for (int i = a; i < b; i++) {
+      sign[i] = true;
+    }
+    if (state == STATE_EMPTY) {
+      state = STATE_BLOCKED;
+    }
+  }
 }
 
 class WorkPlan {
@@ -166,14 +177,14 @@ class WorkPlan {
     }
   }
 
-  List<int> getMaxInterval() {
+  List<int> getMaxInterval(WorkTime t) {
     int ns = st;
     int ne = st;
     int s = st;
     int e = st;
     int i;
     for (i = st; i < en; i++) {
-      if (req[i] > now[i]) {
+      if (req[i] > now[i] && t.sign[i] == false) {
         e = i + 1;
       } else {
         if (ne - ns < e - s) {
@@ -219,7 +230,13 @@ class Worker {
 
   void setShift(ShiftModel? s) {
     if (s != null) {
-      times[s.fromTime.weekday - 1] = WorkTime.fromShift(s);
+      times[s.fromTime.weekday - 1].addShift(s);
+    }
+  }
+
+  void setBlockShift(ShiftModel? s) {
+    if (s != null) {
+      times[s.fromTime.weekday - 1].setBlockInterval(s.fromTime, s.toTime);
     }
   }
 }
@@ -295,7 +312,7 @@ class WorkControl {
           continue;
         }
         for (k = t.st - 1; k >= plan.st; k--) {
-          if (plan.req[k] <= plan.now[k]) {
+          if (plan.req[k] <= plan.now[k] || t.sign[k]) {
             break;
           } else {
             plan.now[k]++;
@@ -336,7 +353,7 @@ class WorkControl {
           continue;
         }
         WorkPlan plan = plans[j];
-        List<int> interval = plan.getMaxInterval();
+        List<int> interval = plan.getMaxInterval(t);
         int st = interval[0];
         int en = interval[1];
         if (st >= en) {

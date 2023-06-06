@@ -184,8 +184,15 @@ class ClShift {
     return appointments;
   }
 
-  Future<bool> forceSaveShift(context, String staffId, String organId,
-      String shiftId, String fromTime, String toTime, String shiftType) async {
+  Future<bool> forceSaveShift(
+      context,
+      String staffId,
+      String organId,
+      String shiftId,
+      String fromTime,
+      String toTime,
+      String shiftType,
+      String deleted) async {
     String apiUrl = '$apiBase/apis/shift/shifts/forceSaveShift';
 
     await Webservice().loadHttp(context, apiUrl, {
@@ -195,6 +202,7 @@ class ClShift {
       'from_time': fromTime,
       'to_time': toTime,
       'shift_type': shiftType,
+      'deleted': deleted,
     }).then((value) => null);
     return true;
   }

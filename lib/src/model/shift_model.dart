@@ -10,6 +10,7 @@ class ShiftModel {
   int uniqueId;
 
   String? metaType;
+  int? deleted;
 
   int getDurationByMinute() {
     return toTime.difference(fromTime).inMinutes;
