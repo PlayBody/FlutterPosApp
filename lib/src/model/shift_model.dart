@@ -11,6 +11,7 @@ class ShiftModel {
 
   String? metaType;
   int? deleted;
+  String? metaRefShiftId;
 
   int getDurationByMinute() {
     return toTime.difference(fromTime).inMinutes;

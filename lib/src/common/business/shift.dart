@@ -192,7 +192,8 @@ class ClShift {
       String fromTime,
       String toTime,
       String shiftType,
-      String deleted) async {
+      String deleted,
+      String refShiftId) async {
     String apiUrl = '$apiBase/apis/shift/shifts/forceSaveShift';
 
     await Webservice().loadHttp(context, apiUrl, {
@@ -203,6 +204,7 @@ class ClShift {
       'to_time': toTime,
       'shift_type': shiftType,
       'deleted': deleted,
+      'ref_shift_id': refShiftId,
     }).then((value) => null);
     return true;
   }

@@ -165,6 +165,30 @@ class _ShiftManage extends State<ShiftManage> {
 
     Dialogs().loaderDialogNormal(context);
     if (globals.saveShiftFromAutoControl.isNotEmpty) {
+      int i = 0, j = 0;
+      int len = globals.saveShiftFromAutoControl.length;
+      for (i = 0; i < len; i++) {
+        ShiftModel m1 = globals.saveShiftFromAutoControl[i];
+        if ((m1.deleted ?? 0) == 0) {
+          continue;
+        }
+        for (j = i + 1; j < len; j++) {
+          ShiftModel m2 = globals.saveShiftFromAutoControl[j];
+          if (m2.staffId != m1.staffId ||
+              m2.fromTime.weekday != m1.fromTime.weekday) {
+            continue;
+          }
+          if (m2.shiftType == constShiftRequest) {
+            m1.metaRefShiftId = m2.shiftId;
+            m1.fromTime = m1.fromTime.compareTo(m2.fromTime) > 0
+                ? m1.fromTime
+                : m2.fromTime;
+            m1.toTime =
+                m1.toTime.compareTo(m2.toTime) < 0 ? m1.toTime : m2.toTime;
+            break;
+          }
+        }
+      }
       for (ShiftModel element in globals.saveShiftFromAutoControl) {
         isSave = await ClShift().forceSaveShift(
             context,
@@ -174,7 +198,8 @@ class _ShiftManage extends State<ShiftManage> {
             element.fromTime.toString(),
             element.toTime.toString(),
             element.metaType ?? element.shiftType,
-            "${element.deleted ?? 0}");
+            "${element.deleted ?? 0}",
+            element.metaRefShiftId ?? "0");
       }
       if (isSave) {
         globals.saveShiftFromAutoControl = [];
