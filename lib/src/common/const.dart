@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 const String consAndroidStore =
     'https://play.google.com/apps/internaltest/4701332527315630553';
 
-const int constIsTestApi = 1;
+const int constIsTestApi = 0;
 
 // ---------------- Permission Manager -----------------------
 const int constAuthGuest = 0;
@@ -147,6 +147,9 @@ List<String> constPointUnit = ['回', '分', '件'];
 String constCheckinTypeNone = '0';
 String constCheckinTypeBoth = '1';
 String constCheckinTypeOnlyReserve = '2';
+
+String constCheckinReserveRiRa = '0';
+String constCheckinReserveShift = '1';
 
 var primaryColor = const Color(0xff117fc1);
 var redColor = const Color(0xffee385a);

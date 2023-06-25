@@ -1,7 +1,10 @@
+import 'package:staff_pos_app/src/common/const.dart';
+
 class OrganModel {
   final String organId;
   final String organName;
   final String isNoReserve;
+  final String isNoReserveType;
   final String organNumber;
   final String organSetNum;
   final bool isUseSet;
@@ -45,6 +48,7 @@ class OrganModel {
     required this.organId,
     required this.organName,
     required this.isNoReserve,
+    required this.isNoReserveType,
     required this.organNumber,
     required this.isUseSet,
     required this.organSetNum,
@@ -92,6 +96,9 @@ class OrganModel {
         isNoReserve: json['is_no_reserve'] == null
             ? '0'
             : json['is_no_reserve'].toString(),
+        isNoReserveType: json['is_no_reserve_type'] == null
+            ? constCheckinReserveRiRa
+            : json['is_no_reserve_type'].toString(),
         organNumber: json['organ_number'] ?? '',
         organSetNum: json['set_number'] ?? '1',
         isUseSet:
@@ -103,7 +110,8 @@ class OrganModel {
         lat: json['lat'] ?? '',
         lon: json['lon'] ?? '',
         distance: json['distance'] ?? '',
-        distance_status: (json['distance_status'] == null || json['distance_status'].toString() == '0')
+        distance_status: (json['distance_status'] == null ||
+                json['distance_status'].toString() == '0')
             ? false
             : true,
         organComment: json['comment'] ?? '',

@@ -108,6 +108,7 @@ class _OrganSetting extends State<OrganSetting> {
   String? organImage;
 
   String checkInType = constCheckinTypeNone;
+  String checkInTypeReserve = constCheckinReserveRiRa;
 
   @override
   void initState() {
@@ -164,6 +165,7 @@ class _OrganSetting extends State<OrganSetting> {
 
     isUseSet = organ.isUseSet;
     checkInType = organ.isNoReserve;
+    checkInTypeReserve = organ.isNoReserveType;
 
     printLogoUrl = organ.printLogoUrl;
     organImage = organ.organImage;
@@ -189,9 +191,7 @@ class _OrganSetting extends State<OrganSetting> {
     setState(() {});
   }
 
-  Future<void> changeDistanceStatus(bool value) async {
-
-  }
+  Future<void> changeDistanceStatus(bool value) async {}
 
   Future<void> saveSetting() async {
     if (selOrganId == null) return;
@@ -232,6 +232,7 @@ class _OrganSetting extends State<OrganSetting> {
       'set_number': selSetNumber,
       'is_use_set': isUseSet ? '1' : '0',
       'is_no_reserve': checkInType,
+      'is_no_reserve_type': checkInTypeReserve,
       'set_time': _setTime == null ? '' : Funcs().getTimeFormatHMM00(_setTime),
       'set_amount': txtSetAmountController.text,
       'table_amount': txtTableAmountController.text,
@@ -785,7 +786,6 @@ class _OrganSetting extends State<OrganSetting> {
           _rowNumber('チェックインチケット消費数', txtCheckinTiecketController),
           RowLabelInput(
               label: '予約チェックイン',
-              // labelWidth: 180,
               renderWidget: Row(
                 children: [
                   RadioNomal(
@@ -816,12 +816,30 @@ class _OrganSetting extends State<OrganSetting> {
                   ),
                 ],
               )),
-          // renderWidget: Switch(
-          //     value: isCheckin,
-          //     onChanged: (v) {
-          //       isCheckin = v;
-          //       setState(() {});
-          //     })),
+          if (checkInType == constCheckinTypeOnlyReserve)
+            RowLabelInput(
+                label: '',
+                renderWidget: Row(
+                  children: [
+                    RadioNomal(
+                      label: '出勤スタッフ',
+                      value: constCheckinReserveRiRa,
+                      groupValue: checkInTypeReserve,
+                      tapFunc: () => setState(() {
+                        checkInTypeReserve = constCheckinReserveRiRa;
+                      }),
+                    ),
+                    const SizedBox(width: 4),
+                    RadioNomal(
+                      label: 'シフト枠',
+                      value: constCheckinReserveShift,
+                      groupValue: checkInTypeReserve,
+                      tapFunc: () => setState(() {
+                        checkInTypeReserve = constCheckinReserveShift;
+                      }),
+                    ),
+                  ],
+                )),
           RowLabelInput(
               label: '備考 ',
               labelPadding: 4,
