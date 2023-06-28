@@ -123,6 +123,9 @@ class _ShiftDetail extends State<ShiftDetail> {
           e['from'] = tempShift.fromTime;
           e['to'] = tempShift.toTime;
           e['new_state'] = tempShift.metaType;
+          if(tempShift.deleted == 1){
+            continue;
+          }
           data['shifts'].add(e);
         }
       }

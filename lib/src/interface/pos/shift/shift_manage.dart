@@ -18,6 +18,7 @@ import 'package:staff_pos_app/src/model/organmodel.dart';
 import 'package:staff_pos_app/src/model/shift_manage_model.dart';
 import 'package:staff_pos_app/src/model/shift_model.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
+import 'dart:math';
 
 import 'package:staff_pos_app/src/common/const.dart';
 import 'package:staff_pos_app/src/common/globals.dart' as globals;
@@ -75,6 +76,8 @@ class _ShiftManage extends State<ShiftManage> {
 
     List<ShiftModel> shifts = await ClShift().loadShifts(context, {
       'organ_id': selOrganId,
+      'from_time': '$showFromDate 00:00:00',
+      'to_time': '$showToDate 23:59:59',
     });
 
     for (int i = 0; i < datas.length; i++) {
@@ -83,15 +86,25 @@ class _ShiftManage extends State<ShiftManage> {
       m.apply = 0;
       m.shift = 0;
 
+      int stTime = m.fromTime.hour * 60 + m.fromTime.minute;
+      int enTime = m.toTime.hour * 60 + m.toTime.minute;
+      List<int> signs = List.generate(max(enTime, stTime), (index) => 0);
       for (var s in globals.saveShiftFromAutoControl) {
         if (s.shiftType == constShiftApply ||
             s.shiftType == constShiftMeApply) {
-          if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
-                  s.toTime.compareTo(m.toTime) >= 0) ||
-              (s.fromTime.compareTo(m.fromTime) >= 0 &&
-                  s.toTime.compareTo(m.toTime) <= 0)) {
-            m.apply++;
+          if(s.fromTime.day == m.fromTime.day){
+            int stCheckTime = s.fromTime.hour * 60 + s.fromTime.minute;
+            int enCheckTime = s.toTime.hour * 60 + s.toTime.minute;
+            for(int cc = max(stCheckTime, stTime); cc < min(enCheckTime, enTime); cc++){
+              signs[cc]++;
+            }
           }
+          // if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
+          //         s.toTime.compareTo(m.toTime) >= 0) ||
+          //     (s.fromTime.compareTo(m.fromTime) >= 0 &&
+          //         s.toTime.compareTo(m.toTime) <= 0)) {
+          //   m.apply++;
+          // }
         }
       }
 
@@ -112,14 +125,35 @@ class _ShiftManage extends State<ShiftManage> {
         if ((s.shiftType == constShiftApply ||
                 s.shiftType == constShiftMeApply) &&
             s.fromTime.compareTo(s.toTime) < 0) {
-          if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
-                  s.toTime.compareTo(m.toTime) >= 0) ||
-              (s.fromTime.compareTo(m.fromTime) >= 0 &&
-                  s.toTime.compareTo(m.toTime) <= 0)) {
-            m.apply++;
+
+          if(s.fromTime.day == m.fromTime.day){
+            int stCheckTime = s.fromTime.hour * 60 + s.fromTime.minute;
+            int enCheckTime = s.toTime.hour * 60 + s.toTime.minute;
+            for(int cc = max(stCheckTime, stTime); cc < min(enCheckTime, enTime); cc++){
+              signs[cc]++;
+            }
           }
+
+          // if ((s.fromTime.compareTo(m.fromTime) <= 0 &&
+          //         s.toTime.compareTo(m.toTime) >= 0) ||
+          //     (s.fromTime.compareTo(m.fromTime) >= 0 &&
+          //         s.toTime.compareTo(m.toTime) <= 0)) {
+          //   m.apply++;
+          // }
         }
       }
+      int apply = 1000;
+      for(int cc = stTime; cc < enTime; cc++){
+        apply = min(signs[cc], apply);
+      }
+      if(apply == 1000){
+        m.apply = 0;
+      } else {
+        m.apply = apply;
+      }
+      // if(m.apply > m.count){
+      //   m.apply = m.count;
+      // }
     }
 
     appointments = FuncShifts().getAppoinsFromManageList(datas);
