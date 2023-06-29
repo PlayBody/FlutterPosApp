@@ -50,8 +50,18 @@ android {
         // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
         minSdkVersion 24
         targetSdkVersion 31
-        versionCode 56
+        versionCode 57
         versionName '1.0.3'
+    }
+    signingConfigs {
+        release {
+            storeFile file("pos_app.pem")
+            keyAlias "my-key-alias"
+            storePassword "Kkni1019"
+            keyPassword "Kkni1019"
+            v1SigningEnabled true
+            v2SigningEnabled true
+        }
     }
 
     buildTypes {

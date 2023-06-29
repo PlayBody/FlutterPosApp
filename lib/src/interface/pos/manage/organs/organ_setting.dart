@@ -816,7 +816,7 @@ class _OrganSetting extends State<OrganSetting> {
                   ),
                 ],
               )),
-          if (checkInType == constCheckinTypeOnlyReserve)
+          // if (checkInType == constCheckinTypeOnlyReserve)
             RowLabelInput(
                 label: '',
                 renderWidget: Row(
