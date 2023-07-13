@@ -15,8 +15,6 @@ import 'package:staff_pos_app/src/common/dialogs.dart';
 import 'package:staff_pos_app/src/interface/login.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/services.dart';
-import 'package:local_auth/local_auth.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
