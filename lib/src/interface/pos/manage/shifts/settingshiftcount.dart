@@ -52,8 +52,8 @@ class _SettingShiftCount extends State<SettingShiftCount> {
   double selColor = 15;
 
   bool isHideBannerBar = false;
-  int viewFromHour = 0;
-  int viewToHour = 0;
+  int viewFromHour = 11;
+  int viewToHour = 20;
 
   @override
   void initState() {
@@ -63,10 +63,12 @@ class _SettingShiftCount extends State<SettingShiftCount> {
   }
 
   Future<List> loadShiftData() async {
+    viewFromHour = 11;
+    viewToHour = 20;
     loadStatus = true;
 
     _fromDate = DateFormat('yyyy-MM-dd').format(
-        getDate(selectedDate.subtract(Duration(days: selectedDate.weekday))));
+        getDate(selectedDate.subtract(Duration(days: (selectedDate.weekday - 1)))));
 
     // print(_fromDate);
     _toDate = DateFormat('yyyy-MM-dd').format(selectedDate
@@ -110,8 +112,11 @@ class _SettingShiftCount extends State<SettingShiftCount> {
         if (viewToHour < element.endTime.hour)
           viewToHour = element.endTime.hour;
       });
+      // viewFromHour--;
       viewToHour++;
     }
+    // if(viewFromHour < 0) viewFromHour++;
+    if(viewToHour >= 24) viewToHour = 24;
     setState(() {});
     return regions;
   }
@@ -134,7 +139,7 @@ class _SettingShiftCount extends State<SettingShiftCount> {
 
   void changeViewCalander(_date) {
     String _cFromDate = DateFormat('yyyy-MM-dd')
-        .format(getDate(_date.subtract(Duration(days: _date.weekday))));
+        .format(getDate(_date.subtract(Duration(days: _date.weekday - 1))));
 
     if (_cFromDate == _fromDate) return;
 
@@ -158,6 +163,9 @@ class _SettingShiftCount extends State<SettingShiftCount> {
     print(_toDate);
     if (results['isCopy']) {
       loadShiftData();
+      setState(() {
+        
+      });
     } else {
       Dialogs().infoDialog(context, errServerActionFail);
     }
@@ -165,26 +173,26 @@ class _SettingShiftCount extends State<SettingShiftCount> {
 
   DateTime getDate(DateTime d) => DateTime(d.year, d.month, d.day);
 
-  void setRegions(results) {
-    if (DateTime.parse(_toDate + ' 23:59:59').isBefore(DateTime.now())) return;
+  // void setRegions(results) {
+  //   if (DateTime.parse(_toDate + ' 23:59:59').isBefore(DateTime.now())) return;
 
-    var firstDate = DateFormat('yyyy-MM-dd')
-        .format(getDate(DateTime.parse(_fromDate).add(Duration(days: 1))));
+  //   var firstDate = DateFormat('yyyy-MM-dd')
+  //       .format(getDate(DateTime.parse(_fromDate).add(Duration(days: 1))));
 
-    for (var item in results['shift_times']) {
-      var _startDate = DateTime.parse(firstDate + ' ' + item['from_time'])
-          .add(Duration(days: int.parse(item['weekday']) - 1));
-      var _endDate = DateTime.parse(firstDate + ' ' + item['to_time'])
-          .add(Duration(days: int.parse(item['weekday']) - 1));
-      regions.add(TimeRegion(
-          startTime: _startDate,
-          endTime: _endDate,
-          enablePointerInteraction: true,
-          // recurrenceRule: 'FREQ=DAILY;INTERVAL=1',
-          color: Color(0xffffc3bf), //shiftOrganDisableColor,
-          text: ''));
-    }
-  }
+  //   for (var item in results['shift_times']) {
+  //     var _startDate = DateTime.parse(firstDate + ' ' + item['from_time'])
+  //         .add(Duration(days: int.parse(item['weekday']) - 1));
+  //     var _endDate = DateTime.parse(firstDate + ' ' + item['to_time'])
+  //         .add(Duration(days: int.parse(item['weekday']) - 1));
+  //     regions.add(TimeRegion(
+  //         startTime: _startDate,
+  //         endTime: _endDate,
+  //         enablePointerInteraction: true,
+  //         // recurrenceRule: 'FREQ=DAILY;INTERVAL=1',
+  //         color: Color(0xffffc3bf), //shiftOrganDisableColor,
+  //         text: ''));
+  //   }
+  // }
 
   void setApppointment(results) {
     for (var item in results['shifts']) {
@@ -259,6 +267,9 @@ class _SettingShiftCount extends State<SettingShiftCount> {
             tapFunc: (v) {
               selOrganId = v!.toString();
               loadShiftData();
+              setState(() {
+                
+              });
             },
           ),
         ),

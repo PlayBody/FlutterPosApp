@@ -68,7 +68,7 @@ class MyDrawer extends StatelessWidget {
                     Navigator.push(context, MaterialPageRoute(builder: (_) {
                       return OrganSetting();
                     }))),
-          if (globals.auth < constAuthSystem && globals.auth > constAuthStaff)
+          if (globals.auth <= constAuthSystem && globals.auth > constAuthStaff)
             createDrawerBodyItem(
                 icon: Icons.filter_tilt_shift,
                 text: 'シフト枠設定',
