@@ -601,8 +601,8 @@ class _AdminUserEdit extends State<AdminUserEdit> {
                     onChanged: (value) => item.resetCount = value,
                   )
                 : DropDownNumberSelect(
-                    contentPadding: EdgeInsets.all(6),
-                    value: int.parse(item.resetCount) > int.parse(item.maxCount)
+                    contentPadding: const EdgeInsets.all(6),
+                    value: int.parse(item.resetCount) >= int.parse(item.maxCount)
                         ? item.maxCount
                         : item.resetCount,
                     plusnum: 10,

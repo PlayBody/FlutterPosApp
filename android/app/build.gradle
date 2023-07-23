@@ -47,7 +47,7 @@ android {
         applicationId "com.cloud.posandroid"
         minSdkVersion 24
         targetSdkVersion 31
-        versionCode 57
+        versionCode 58
         versionName '1.0.3'
     }
     signingConfigs {
