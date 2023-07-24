@@ -13,7 +13,7 @@ import 'package:staff_pos_app/src/http/webservice.dart';
 import 'package:staff_pos_app/src/interface/components/buttons.dart';
 import 'package:staff_pos_app/src/interface/components/loadwidgets.dart';
 import 'package:staff_pos_app/src/interface/home.dart';
-import 'package:open_file/open_file.dart';
+import 'package:open_file_safe/open_file_safe.dart';
 
 import 'package:staff_pos_app/src/common/globals.dart' as globals;
 

@@ -67,7 +67,7 @@ dependencies:
   flutter_dialogs: ^3.0.0
   euc: ^1.0.6+8
   flutter_beep: ^1.0.0
-  open_file: ^3.2.1
+  open_file_safe: ^3.2.3
   syncfusion_flutter_pdf: ^20.2.44
   file_picker: ^4.2.7
   excel: ^2.0.0-null-safety-3
